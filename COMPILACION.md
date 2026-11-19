@@ -50,7 +50,7 @@ SELFTEST OK
 ## 3. ps3recomp
 
 ```powershell
-cd C:\Users\User\Desktop\rm7_work\ps3recomp
+cd C:\Users\User\Desktop\mr7_work\ps3recomp
 
 python -m pip install -r requirements.txt
 
@@ -119,7 +119,7 @@ Copiar:
 
 ```
 maxracer7.exe
-config\rm7.ini
+config\mr7.ini
 docs\
 ```
 

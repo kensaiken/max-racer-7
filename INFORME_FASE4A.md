@@ -140,7 +140,7 @@ TODOs son datos, no instrucciones.
 
 ### 4.2 Build del port
 
-Se creó `rm7_work/port` desde `templates/project`, con:
+Se creó `mr7_work/port` desde `templates/project`, con:
 
 - `recompiled/` = los 9 TUs + header;
 - `game/EBOOT.elf`;
@@ -238,7 +238,7 @@ Interpretación:
   desreferencia.
 
 El proceso se dejó 180 s y se terminó; no hubo crash del host ni del backend.
-El log está en `rm7_work/port/boot_stdout.log` y `boot_stderr.log`.
+El log está en `mr7_work/port/boot_stdout.log` y `boot_stderr.log`.
 
 **Conclusión:** primera ejecución nativa de código de MR7 conseguida. El
 siguiente bloqueo es HLE de `cellFont`, no el lifter ni el arranque.

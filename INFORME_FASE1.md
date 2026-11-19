@@ -66,7 +66,7 @@ Cualquier afirmación en contrario sería falsa.
 | Ninja | incluido en el toolchain | build |
 | Python | 3.12.10 | pipeline de activos |
 | Git | disponible | repositorios |
-| ps3recomp | v0.19.0 (clon `rm7_work/ps3recomp`) | runtime y lifters |
+| ps3recomp | v0.19.0 (clon `mr7_work/ps3recomp`) | runtime y lifters |
 | RRUnpacker | `Nenkai/RRUnpacker` (referencia MIT) | formato `.DAT` |
 | vgmstream `nub.c` | referencia pública | formato `.nub` |
 | FFmpeg | 9.0.2 essentials | validación de audio/vídeo |

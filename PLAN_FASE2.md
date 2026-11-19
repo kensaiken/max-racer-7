@@ -225,7 +225,7 @@ archivos extraídos.
 ```
 MR7-Native/
   maxracer7.exe
-  config/rm7.ini
+  config/mr7.ini
   data/                  (shaders propios, fuentes, iconos)
   gamedata/              (extraído por el usuario; no se distribuye)
   save/                  (en %LOCALAPPDATA%)

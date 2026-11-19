@@ -11,7 +11,7 @@ memoria ya no pueden separar:
 
 - Build con simbolos: `build_dbg\MyGameRecomp.exe` + `MyGameRecomp.pdb`
   (configurado con `-O1 -g`; el Release de `build\` no se toca).
-- Abrir en VS la carpeta del proyecto (`rm7_work\port`) o el `CMakeLists.txt`.
+- Abrir en VS la carpeta del proyecto (`mr7_work\port`) o el `CMakeLists.txt`.
 - **No** hace falta configurar VS para lanzar: usa `run_debug.cmd` y luego
   *Depurar > Asociar al proceso* (`Attach to Process`) sobre `MyGameRecomp.exe`.
   VS encontrara el `.pdb` en la misma carpeta.
