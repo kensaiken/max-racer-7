@@ -1,5 +1,5 @@
 # Plan técnico — Fase 2
-## Arquitectura del port nativo de Max Racer 7
+## Arquitectura del port nativo de Ridge Racer 7
 
 **Estado:** plan aprobado para ejecución.  
 **Ejecución (16/11/2026):** ELF descifrado; 14.067 funciones y 42 imágenes SPU
@@ -20,12 +20,12 @@ solo lo que pertenece al sistema operativo, la GPU o la plataforma.
 | SPU | lift por imagen + runtime de canales/DMA | preservar Local Store y sincronización |
 | GPU | comandos RSX → backend **D3D12** de ps3recomp | ejecuta los shaders originales |
 | Presentación | D3D12 (Fase 4+); D3D11 solo para el shell actual | un solo dispositivo, menos copias |
-| Simulación | **60 Hz fijos** con acumulador | MR7 está diseñado a 60 Hz |
+| Simulación | **60 Hz fijos** con acumulador | RR7 está diseñado a 60 Hz |
 | Render | desacoplado, vsync/uncapped configurable | 60/120/144 Hz sin alterar física |
 | Audio | WASAPI + FFmpeg para ATRAC3plus | 5.1 real, decodificación probada |
 | Input | XInput + teclado; SDL3 opcional | mandos Xbox/PS y PC |
 | Activos | extraídos del disco del usuario a `gamedata/` | legalidad y carga simple |
-| Guardado | `%LOCALAPPDATA%\MR7Native\save` | no tocar el disco original |
+| Guardado | `%LOCALAPPDATA%\RR7Native\save` | no tocar el disco original |
 | Distribución | `.exe` + `config/` + `docs/`; datos aparte | sin RPCS3 ni activos |
 
 ### 1.1 Frontera recompilado / reescrito
@@ -59,7 +59,7 @@ la IA ni el comportamiento de los vehículos.
 
 ```
 game/EBOOT.ELF            (descifrado por el usuario)
-PS3_GAME/USRDIR/MR7.DAT   (original, solo lectura)
+PS3_GAME/USRDIR/RR7.DAT   (original, solo lectura)
 ```
 
 ### 2.2 Etapas
@@ -82,7 +82,7 @@ PS3_GAME/USRDIR/MR7.DAT   (original, solo lectura)
   de los registros, nunca un retorno silencioso.
 - **Punteros huésped↔host:** las APIs que reciben punteros necesitan wrappers de
   traducción; el adaptador genérico de ps3recomp pasa el valor crudo.
-- **TOC de MR7:** localizarla con `tools/maxracer_dat.py` y conservar el offset en la
+- **TOC de RR7:** localizarla con `tools/rr7_dat.py` y conservar el offset en la
   configuración del port.
 
 ### 2.4 Criterio de salida de la etapa
@@ -172,8 +172,8 @@ job SPU, se conserva el efecto o se documenta la diferencia.
 ### 6.1 Flujo de instalación
 
 1. El usuario monta el ISO o copia `PS3_GAME`.
-2. El port localiza `MR7.DAT` y `EBOOT.ELF`.
-3. Si no existe `gamedata/`, extrae los contenedores con `tools/maxracer_dat.py`
+2. El port localiza `RR7.DAT` y `EBOOT.ELF`.
+3. Si no existe `gamedata/`, extrae los contenedores con `tools/rr7_dat.py`
    (o una versión C++ integrada) a `gamedata/`.
 4. Verifica tamaños/hashes y escribe `gamedata/manifest.json`.
 5. El runtime carga desde `gamedata/`; el disco original queda intacto.
@@ -223,9 +223,9 @@ archivos extraídos.
 ## 9. Estructura del proyecto final
 
 ```
-MR7-Native/
-  maxracer7.exe
-  config/mr7.ini
+RR7-Native/
+  rr7native.exe
+  config/rr7.ini
   data/                  (shaders propios, fuentes, iconos)
   gamedata/              (extraído por el usuario; no se distribuye)
   save/                  (en %LOCALAPPDATA%)

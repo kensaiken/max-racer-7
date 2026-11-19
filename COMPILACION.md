@@ -17,7 +17,7 @@ No se requiere Visual Studio para el shell. ps3recomp documenta clang-cl + VS
 ## 2. Shell nativo
 
 ```powershell
-cd C:\Users\User\Desktop\MR7-Native
+cd C:\Users\User\Desktop\RR7-Native
 .\build.ps1
 ```
 
@@ -28,13 +28,13 @@ cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Release
 cmake --build build --parallel
 ```
 
-Salida: `build\maxracer7.exe`.
+Salida: `build\rr7native.exe`.
 
 ### Pruebas
 
 ```powershell
-.\build\maxracer7.exe --selftest --frames 60
-.\build\maxracer7.exe --window --frames 60
+.\build\rr7native.exe --selftest --frames 60
+.\build\rr7native.exe --window --frames 60
 python run_tests.py
 ```
 
@@ -50,7 +50,7 @@ SELFTEST OK
 ## 3. ps3recomp
 
 ```powershell
-cd C:\Users\User\Desktop\mr7_work\ps3recomp
+cd C:\Users\User\Desktop\rr7_work\ps3recomp
 
 python -m pip install -r requirements.txt
 
@@ -103,7 +103,7 @@ ffprobe out\bgm\tone_0000.at3
 | `CreateDXGIFactory` unresolved | enlazar `dxgi` y `dxguid` |
 | `D3D11CreateDevice failed` | driver/GPU; el selftest informa el HRESULT |
 | `Could not load configuration` | ejecutar desde la raíz o pasar `--config` |
-| `not an ELF file` en `maxracer_dat.py` | el EBOOT sigue cifrado; hace falta el ELF |
+| `not an ELF file` en `rr7_dat.py` | el EBOOT sigue cifrado; hace falta el ELF |
 | `KeyError` en tests | ejecutar `python run_tests.py` desde la raíz |
 
 ## 6. Distribución
@@ -118,8 +118,8 @@ cmake --build build-release --parallel
 Copiar:
 
 ```
-maxracer7.exe
-config\mr7.ini
+rr7native.exe
+config\rr7.ini
 docs\
 ```
 

@@ -1,5 +1,5 @@
 # Informe Fase 4A — Desbloqueo y primera recompilación
-## Max Racer 7 (BCES00009)
+## Ridge Racer 7 (BCES00009)
 
 **Fecha:** 16 de noviembre de 2026  
 **Estado:** PPU y SPU recompilados; build nativo en curso. **Todavía no se ha
@@ -140,7 +140,7 @@ TODOs son datos, no instrucciones.
 
 ### 4.2 Build del port
 
-Se creó `mr7_work/port` desde `templates/project`, con:
+Se creó `rr7_work/port` desde `templates/project`, con:
 
 - `recompiled/` = los 9 TUs + header;
 - `game/EBOOT.elf`;
@@ -169,9 +169,9 @@ audio; validar el scheduler y los canales en ejecución.
 
 ---
 
-## 6. MR7.DAT: TOC real y extracción
+## 6. RR7.DAT: TOC real y extracción
 
-`tools/maxracer_dat.py locate` sobre el ELF real:
+`tools/rr7_dat.py locate` sobre el ELF real:
 
 ```
 toc_offset             = 0x630128
@@ -228,7 +228,7 @@ Interpretación:
 - El arranque **no** se queda en el loader ni en el CRT: llega a la
   inicialización de vídeo, GCM y fuentes.
 - El backend D3D12 crea dispositivo, depth buffer, pipelines y vertex buffer.
-- MR7 configura framebuffers de **1920×1080** y tiles GCM.
+- RR7 configura framebuffers de **1920×1080** y tiles GCM.
 - Se crea el hilo `TTFontRender Thread` y el hilo principal espera un semáforo.
 - El hilo de fuentes se bloquea porque faltan:
   - `0x7A0A83C4` = `cellFontInitLibraryFreeTypeWithRevision`
@@ -238,9 +238,9 @@ Interpretación:
   desreferencia.
 
 El proceso se dejó 180 s y se terminó; no hubo crash del host ni del backend.
-El log está en `mr7_work/port/boot_stdout.log` y `boot_stderr.log`.
+El log está en `rr7_work/port/boot_stdout.log` y `boot_stderr.log`.
 
-**Conclusión:** primera ejecución nativa de código de MR7 conseguida. El
+**Conclusión:** primera ejecución nativa de código de RR7 conseguida. El
 siguiente bloqueo es HLE de `cellFont`, no el lifter ni el arranque.
 
 ### 7.2 Tercer arranque: mempool y fuente por defecto
@@ -284,7 +284,7 @@ semáforo 4 y el objeto `0x1055D520`, no añadir más stubs.
 
 ### 7.3 Diagnóstico opt-in del contexto de fuentes
 
-Con `MR7_FONT_SEED=1` se siembra el contexto `0x1055D520` con un buffer invitado
+Con `RR7_FONT_SEED=1` se siembra el contexto `0x1055D520` con un buffer invitado
 de 1024×1024 en `0x0F000000`. Resultado:
 
 - desaparecen las lecturas nulas de 32 bits en `+0x20/+0x1C/+0x0`;
@@ -307,13 +307,13 @@ Se descubrió un requisito operativo importante: con el ISO **desmontado**, el
 hilo principal entra en un bucle de:
 
 ```
-[fs] open FAIL '/dev_bdvd/PS3_GAME/USRDIR/MR7.DAT'
-     -> 'G://PS3_GAME/USRDIR/MR7.DAT'
+[fs] open FAIL '/dev_bdvd/PS3_GAME/USRDIR/RR7.DAT'
+     -> 'G://PS3_GAME/USRDIR/RR7.DAT'
 ```
 
 Al montar el ISO y usar `PS3_VFS_ROOT=G:/`, los `open FAIL` desaparecen. El disco
 debe estar montado antes de arrancar; el script `port/run_boot.ps1` ahora lo
-verifica y falla con un mensaje claro si `MR7.DAT` no está accesible.
+verifica y falla con un mensaje claro si `RR7.DAT` no está accesible.
 
 Con el VFS correcto, el bloqueo restante es el semáforo 4:
 
@@ -321,7 +321,7 @@ Con el VFS correcto, el bloqueo restante es el semáforo 4:
 - `tid=3` (TTFontRender) postea y luego espera en `0x2D1644`;
 - no hay más `post`.
 
-Forzar el wait del worker (`MR7_FONT_NOWAIT=1`) produce un **spin de millones de
+Forzar el wait del worker (`RR7_FONT_NOWAIT=1`) produce un **spin de millones de
 iteraciones**, no avance: el semáforo 4 es un **frame loop**, no un simple
 handshake de inicialización. Por eso la solución no es saltarse la espera, sino
 implementar correctamente el contexto/señal de frame del renderizador de fuentes.
@@ -331,7 +331,7 @@ cargando el `.DAT`.
 
 ### 7.5 Estado tras corregir el VFS: pipeline de carga
 
-Con el ISO montado y `MR7_FONT_SEED=1`, el hilo principal ya no se queda en
+Con el ISO montado y `RR7_FONT_SEED=1`, el hilo principal ya no se queda en
 fuentes. Se crean los hilos reales del motor:
 
 | tid | nombre | función |
@@ -348,7 +348,7 @@ fuentes. Se crean los hilos reales del motor:
 El hilo principal alternativa semáforos 3/5/7 con `Draw Thread` y `File Thread`:
 es el **pipeline de carga/render**, no un deadlock de fuentes. Sin embargo:
 
-- no aparecen lecturas de `MR7.DAT` en `PS3_FSTRACE`;
+- no aparecen lecturas de `RR7.DAT` en `PS3_FSTRACE`;
 - `sample_game_data` y `auto_load` terminan inmediatamente después de
   `sys_mapper`/`sys_memory`;
 - `Initialize Thread` gira en `mutex 17` sin trabajo;
@@ -361,7 +361,7 @@ la función `0x4CB6F0` (`File Thread`), no el font.
 
 ### 7.6 Hito: SPU de audio ejecutándose y primeros frames D3D12
 
-Con `MR7_FONT_SEED=1` y `MR7_FONT_NOWAIT=1` (yield de 1 ms en el wait del hilo
+Con `RR7_FONT_SEED=1` y `RR7_FONT_NOWAIT=1` (yield de 1 ms en el wait del hilo
 de fuentes), el arranque avanza hasta el motor real:
 
 ```
@@ -398,12 +398,12 @@ pipeline states falla:
 `set_shader(fp=0x043E4C80)`. Hay que depurar ese render target/PSO (root
 signature, shader o recurso inválido), no el lifter.
 
-También aparece `open FAIL /dev_hdd0/game/BLJS10001/USRDIR/MR7.DAT` (ruta de
+También aparece `open FAIL /dev_hdd0/game/BLJS10001/USRDIR/RR7.DAT` (ruta de
 instalación en HDD de otra versión); es un fallback, no bloquea el arranque.
 
 ### 7.7 PSO de fragmento: `INVALID_CALL` con descripción válida
 
-El path VP de debug font no es la única causa: con `MR7_NO_VP=1` el PSO de
+El path VP de debug font no es la única causa: con `RR7_NO_VP=1` el PSO de
 fragmento invitado sigue fallando. La descripción registrada es:
 
 ```
@@ -533,7 +533,7 @@ tiene PSOs válidos y el dispositivo sobrevive.
 
 ### 7.12 Sin RT de escena que componer
 
-`MR7_FORCE_COMPOSITE=1` fuerza `s_composite_src=2` antes de
+`RR7_FORCE_COMPOSITE=1` fuerza `s_composite_src=2` antes de
 `composite_present`, pero no se imprime ningún `[COMPOSITE]`: no hay un
 offscreen RT de escena válido (`s_last_drawn_slot < 0` o sin recurso). El
 backbuffer sigue negro.
@@ -573,7 +573,7 @@ Conclusión: no basta con stubs de retorno; hace falta implementar el **objeto
 (quién escribe `0x4E6ACC` y cuándo). Es la siguiente tarea de HLE, no un fallo
 del lifter.
 
-### 7.14 Geometría real del FIFO de MR7 y fin del desvío del walker
+### 7.14 Geometría real del FIFO de RR7 y fin del desvío del walker
 
 La traza con `GCM_PUTDBG=1`/`GCM_CTXDBG=1` da la topología exacta, que no era la
 supuesta:
@@ -628,7 +628,7 @@ Ya no hay ni un solo salto a datos de vértices ni retirada de dispositivo.
 
 ### 7.15 Diálogo de carga localizado
 
-MR7 (build PAL, textos en español) abre
+RR7 (build PAL, textos en español) abre
 `cellMsgDialog` con *«¿Cancelar carga de datos?»* (`type=0x110`: SÍ/NO con
 barra de progreso). La heurística `msg_offers_to_abort()` sólo conocía palabras
 inglesas, así que caía en el valor por defecto **YES** y cancelaba la carga.
@@ -637,7 +637,7 @@ Se añadieron formas localizadas (`cancelar`, `annuler`, `abbrechen`, `annulla`�
 en `libs/system/cellMsgDialog.c`. Con `MSGDIALOG_ANSWER=auto` el diálogo se
 responde NO.
 
-**Importante:** en MR7 la respuesta que deja avanzar es **YES** (NO reintenta
+**Importante:** en RR7 la respuesta que deja avanzar es **YES** (NO reintenta
 `cellSaveData`: bucle `AutoLoad → NODATA → diálogo`). Por eso el valor por
 defecto sigue siendo YES; el cambio sólo hace correcta la heurística
 documentada, no cambia el comportamiento de arranque.
@@ -648,14 +648,14 @@ Con el render sano y el FIFO acotado, el juego sigue en negro. Lo medido:
 
 - `PERF=1`: el render va a **65–153 fps**; el 90–98 % del tiempo es código
   invitado, no el backend.
-- Las lecturas de `MR7.DAT` (fd 3, desde `/dev_bdvd/PS3_GAME/USRDIR/MR7.DAT`)
+- Las lecturas de `RR7.DAT` (fd 3, desde `/dev_bdvd/PS3_GAME/USRDIR/RR7.DAT`)
   avanzan hasta **41 273 344 bytes** y ahí se detienen de forma estable.
 - `auto_load` (tid 12) repite `cellSaveData AutoLoad` → el callback del juego
   devuelve `-4` (`CBRESULT_ERR_NODATA`) → HLE devuelve
   `CELL_SAVEDATA_ERROR_NODATA` → diálogo de cancelar. Con YES continúa.
 - La imagen SPU `bnusCore` arranca y sólo registra 8 `drain-resume` en
   `pc=0x0E8E0`; después queda inactiva (esperando un evento/DMA).
-- No llega **ninguna** llamada `cellPamf`/`cellVdec`/`cellDmux` a HLE: MR7
+- No llega **ninguna** llamada `cellPamf`/`cellVdec`/`cellDmux` a HLE: RR7
   enlaza esas librerías de forma estática, así que su decodificador de vídeo es
   código invitado y depende de las tareas SPU.
 - `cellAudio` está iniciado (`PortOpen(nChannel=8)`, `PortStart`) y
@@ -738,11 +738,11 @@ ni `sys_spu_thread_group_join` después de `group_start` (verificado con
 `PS3_HLE_TRACE=1`): no puede responder al SPU por sí mismo. Por tanto la
 respuesta al `stop 0x110` tiene que venir del runtime, y hoy sólo la implementa
 la ruta del **intérprete** (`spu_interp.c:518`, con un `g_spu_pending_evt`
-global pensado para otro título), no la ruta **liftada** que usa MR7
+global pensado para otro título), no la ruta **liftada** que usa RR7
 (`spu_lifted_thread.c` sólo reconoce 0x102/0x101 como salida).
 
 Siguiente paso técnico, ya acotado: portar ese servicio a la ruta liftada,
-resolviendo el destino del `receive_event` para MR7 (el valor `0x6E754153` no
+resolviendo el destino del `receive_event` para RR7 (el valor `0x6E754153` no
 es un `spuqueue` EA ni lleva puerto) contra el código PPU del hilo decoder
 (`OPD 0x004E4100 → EA 0x0039D900`). Es un trabajo de RE del protocolo bnusCore,
 no un fallo del backend ni del lifter.
@@ -963,7 +963,7 @@ ejecución quién llama al push.
 
 ### 7.26 Mapa de hilos por `lr` y estado real del cargador
 
-Se añadió `MR7_LRS=1` al port: cada 5 s imprime el `lr` invitado de **todos** los
+Se añadió `RR7_LRS=1` al port: cada 5 s imprime el `lr` invitado de **todos** los
 hilos (el watchdog equivalente sólo existía en el arnés genérico). Mapa medido en
 el atasco:
 
@@ -1031,7 +1031,7 @@ loader.
   callback cuando había servidor psnr (ONLINE); en OFFLINE no se invocaba nunca.
   Ahora se notifica el estado **actual** (OFFLINE) en el siguiente
   `cellSysutilCheckCallback`, que es lo que hace hardware al asentarse el
-  manager. Verificado: MR7 **no registra** ese callback (sólo llama a
+  manager. Verificado: RR7 **no registra** ese callback (sólo llama a
   `sceNpManagerGetStatus`), así que este cambio es inerte para el juego — pero es
   más fiel para otros títulos.
 - **Input**: ni `PAD_AUTOPRESS` (CROSS periódico) ni `YDKJ_INJECT_PAD`
@@ -1059,7 +1059,7 @@ Comprobaciones de esta ronda:
 
 - `RECYCLE_DBG=1`: el callback de "buffer lleno" del contexto **nunca se invoca**
   (0 llamadas), así que no es él quien devuelve los punteros;
-- `MR7_LRS=1` + in-flight de HLE: el hilo principal está dentro de
+- `RR7_LRS=1` + in-flight de HLE: el hilo principal está dentro de
   `cellGcmSetWaitFlip` en las muestras (normal, es su espera de frame), y los
   hilos 7 y 12 tienen el marcador de `sys_ppu_thread_exit` colgado (cosmético:
   ya habían terminado).
@@ -1106,7 +1106,7 @@ dibujos, 1 diálogo). Ningún timeout interno del juego lo desbloquea.
 RPCS3 0.0.43 está instalado con `dev_flash`, y reconoce el disco:
 
 ```
-Title: "MAX RACER 7 [BCES00009]"
+Title: "RIDGE RACER 7 [BCES00009]"
 Reason: Firmware is missing   (emulation is stopping)
 ```
 
@@ -1115,7 +1115,7 @@ firmware incompleto. Sin el firmware del usuario (que no se puede distribuir) no
 sirve como referencia; queda anotado como vía disponible si el usuario lo
 instala.
 
-### 7.32 Referencia operativa: MR7 llega a la pantalla de título
+### 7.32 Referencia operativa: RR7 llega a la pantalla de título
 
 El usuario aportó su `PS3UPDAT.PUP` (196,6 MB, `SCEUF` v1, SHA-256
 `99C04429…C9D464`). Se instaló **solo en su RPCS3 local** (no se copia al
@@ -1132,7 +1132,7 @@ Con el firmware, `rpcs3 --no-gui G:\` arranca el disco (ISO archive,
 
 - captura local: `docs/referencia_titulo_rpcs3.png` (solo referencia interna,
   del juego del usuario);
-- se ve el Skyline GT-R, el logo **MAX RACER 7** y el texto *“Welcome to
+- se ve el Skyline GT-R, el logo **RIDGE RACER 7** y el texto *“Welcome to
   Ridge State, the home of drift racing! …”*, a **74 fps**.
 
 Medición: RPCS3 lee **77 MB** y deja de leer al llegar al título (25 s). Nuestro
@@ -1171,7 +1171,7 @@ el `put` que ve el walker es una **derivación** nuestra de `ctx->current`.
 
 Siguiente paso concreto: con la referencia de RPCS3 ya operativa, activar en su
 config los canales TTY de `sys_rsx`/`cellGcmSys` y ver **por dónde publica el
-`put`** MR7 en hardware; replicarlo en el HLE.
+`put`** RR7 en hardware; replicarlo en el HLE.
 
 ### 7.34 Corrección: el juego SÍ publica `put` (yo vigilaba mal)
 
@@ -1210,7 +1210,7 @@ publicador) y quién la llama.
 El publicador `func_000BCAE4` se llama desde `func_000BE0CC` (bucle de frame del
 hilo principal) en `0xBE318`. El resto del bucle tiene una rama que **salta el
 render** (`loc_000BE320` → `func_000BDB18` → vuelve a `loc_000BE124`), y en los
-volcados `MR7_LRS` el hilo principal aparece justo ahí:
+volcados `RR7_LRS` el hilo principal aparece justo ahí:
 
 ```
 guest-tid 1  lr=0x000BE348   <- rama "todavía no toca renderizar"
@@ -1304,7 +1304,7 @@ Para no dar por bueno un diagnóstico blando se comprobaron las dos piezas:
 Es literalmente un método virtual por defecto que devuelve 1. El lifter no lo
 inventó.
 
-2. **El objeto está a cero.** Nuevo volcado `MR7_MEMDUMP=<ea>[:len]` (validado
+2. **El objeto está a cero.** Nuevo volcado `RR7_MEMDUMP=<ea>[:len]` (validado
 antes contra el bloque de control y el contexto):
 
 ```
@@ -1399,12 +1399,12 @@ de **memoria** (volcar el objeto equivalente en ambos), no de log.
    `receive_event`) si aparece una clave real; hoy sólo se implementa la
    negativa `CELL_ESRCH`, que es la respuesta de hardware.
 3. Decidir si `SAVEDATA_NODATA_OK` debe ser el comportamiento por defecto
-   (elimina el bucle `AutoLoad` de MR7) o quedarse como sonda, y justificarlo
+   (elimina el bucle `AutoLoad` de RR7) o quedarse como sonda, y justificarlo
    con más títulos.
 4. Con contenido real, validar `composite_present` y `RTT_PASS`; hoy el frame es
    un único triángulo negro sin texturas.
 5. Fuentes: `cellFontFT` es un stub y `OpenFontset` depende del firmware. Falta
-   el modelo real del objeto `CellFontLibrary`/renderer y, si MR7 no trae un TTF,
+   el modelo real del objeto `CellFontLibrary`/renderer y, si RR7 no trae un TTF,
    decidir cómo se aporta la fuente del sistema sin distribuirla.
 6. Implementar el vídeo PAMF/MPEG-2 (FFmpeg) si el juego reproduce `title.pam`
    por su ruta estática.
@@ -1473,7 +1473,7 @@ Con `g = 0x1042BFC8`: `g->[4] = 1` (escrito una vez en la construcción por
 - `g->[4] != 0` ⇒ la rama `bne` **salta la espera** en cada vuelta → giro puro.
 - `g->[0] != 0x10` ⇒ la condición de salida **nunca** se cumple.
 
-**Medido en vivo** con un vigilante periodico (`MR7_PUMP=1`, cada 250 ms) que
+**Medido en vivo** con un vigilante periodico (`RR7_PUMP=1`, cada 250 ms) que
 resuelve la misma cadena que el hilo usa (`toc-0x7F68` -> base -> `base-0x7FE4`)
 y que ademas lee el mutex para demostrar que ve memoria viva (alterna
 `00000000`/`FFFFFFFF` millones de veces por segundo):
@@ -1512,7 +1512,7 @@ frame; el bucle del `Initialize` no es un atasco aislado sino su bucle principal
 (`LV2_ARG_U64(ctx, 2)`).
 
 **No se ha aplicado el cambio**, y el motivo está en el binario: el envoltorio de
-MR7 hace exactamente
+RR7 hace exactamente
 
 `
 00038148: li   r4, 0        ; mutex = 0
@@ -1523,7 +1523,7 @@ MR7 hace exactamente
 
 y **nunca fija 5**. Con el arreglo "correcto", esta llamada recibiría un timeout
 basura y dejaría de bloquear; con el código actual recibe 0 (infinito), que es el
-comportamiento que MR7 necesita aquí. Queda documentado como defecto a corregir
+comportamiento que RR7 necesita aquí. Queda documentado como defecto a corregir
 con una prueba A/B por título, no a ciegas.
 
 ### 7.43 Instrumentación añadida (opt-in, silenciosa)
@@ -1541,7 +1541,7 @@ Verificado con las sondas apagadas: `garbage=0`, `device removed=0`,
 
 | Variable / cambio | Que aporta |
 |---|---|
-| `MR7_PUMP=1` | vigilante de 250 ms sobre el objeto del bucle (`slot`, `g`, `g+0/4/8/C`, mutex, cond): resuelve la cadena igual que el invitado y prueba que ve memoria viva |
+| `RR7_PUMP=1` | vigilante de 250 ms sobre el objeto del bucle (`slot`, `g`, `g+0/4/8/C`, mutex, cond): resuelve la cadena igual que el invitado y prueba que ve memoria viva |
 | `PS3_SC_STATS=1` | histograma de syscalls cada 2 s + reparto del 102 por hilo + **sitio de llamada (`lr`)** del `mutex_lock` de tid 11 |
 | `PS3_COND_STATS=1` | contadores por condicion (`waits/instant/blocked/timeout/eperm/esrch` y `signal/signal_all/nohit`) |
 | `[CALL]` de `PS3_CALLTRACE` | incluye ahora `r2`, para detectar cuando un hilo usa el TOC de otro modulo |
@@ -1563,7 +1563,7 @@ Correcciones registradas:
 2. La afirmacion "`g->[8]` se borra sin escritor" (�7.41 anterior) era **falsa** y
    queda sustituida por la medicion en vivo.
 3. `sys_cond_wait` lee el timeout de `gpr[4]` (mutex) en vez de `gpr[5]`: defecto
-   real del toolkit, **deliberadamente no aplicado** porque el envoltorio de MR7
+   real del toolkit, **deliberadamente no aplicado** porque el envoltorio de RR7
    (`li r4,0`, sin tocar `r5`) dejaria de bloquear con el arreglo ingenuo.
 
 ### 7.45 El motor SI corre: bucle de frames a ~33 Hz, sin contenido que dibujar
@@ -1614,7 +1614,7 @@ punto exacto a leer a continuacion.
 | Cambio | Que aporta |
 |---|---|
 | ``SEMCHAIN_TID`` / ``SEMCHAIN_SEM`` / ``SEMCHAIN_SKIP`` | elegir hilo, semaforo y saltar las N primeras esperas (el original fijaba tid 0/sem 7 y solo capturaba el arranque) |
-| ``MR7_PUMP`` | ademas de ``g``/mutex/cond, lee la lista de tareas del *listener* (``+0x3C``, ``+0x88``, ``+0x8C``, ``+0x90``) |
+| ``RR7_PUMP`` | ademas de ``g``/mutex/cond, lee la lista de tareas del *listener* (``+0x3C``, ``+0x88``, ``+0x8C``, ``+0x90``) |
 
 Medido en vivo: la lista de tareas del frontend oscila entre 3 y 12 entradas, es
 decir el frontend procesa trabajo cada frame (no esta parado).
@@ -1657,7 +1657,7 @@ Punto de continuacion: quien debe encolar la siguiente fase tras ``seq 0x71``
 ### 7.48 La cola de comandos del loader esta VACIA: la carga de arranque termino
 
 El objeto del loader se resuelve con **dos** indirecciones, no una:
-``obj = *(*(toc-0x7F84) - 0x8000)``. Con esa correccion, ``MR7_PUMP`` da el estado
+``obj = *(*(toc-0x7F84) - 0x8000)``. Con esa correccion, ``RR7_PUMP`` da el estado
 estable:
 
 ```
@@ -1691,7 +1691,7 @@ Sondas descartadas en esta ronda (para que no se repitan):
 
 | Pista | Resultado |
 |---|---|
-| ``ARG[...] vtbl=0 -> code=0`` en el log | sonda heredada de otro titulo (direcciones fijas de LBP); **ruido** para MR7 |
+| ``ARG[...] vtbl=0 -> code=0`` en el log | sonda heredada de otro titulo (direcciones fijas de LBP); **ruido** para RR7 |
 | Mensajes TTY del juego | el titulo **no imprime nada** (``sys_tty_write`` volcaria el texto; no hay lineas) |
 | ``+0x6834/+0x6838`` leidos en ``*(toc-0x7F84)`` | objeto equivocado: faltaba la indireccion ``-0x8000`` |
 
@@ -1774,7 +1774,7 @@ seguir es de donde obtiene el juego su base de anillo (``0x00CB0000`` aprox.);
 con la base correcta el ``current`` del contexto debe caer en el mismo tramo y el
 walker decodifica en vez de resincronizar.
 
-Sondas de esta ronda: ``MR7_PUMP`` resuelve en vivo la cadena del Draw Thread
+Sondas de esta ronda: ``RR7_PUMP`` resuelve en vivo la cadena del Draw Thread
 (3 indirecciones) y la del loader; ``PPU_WWATCH=20002000`` identifica quien
 publica ``put`` (``func_000BCAE4``, 6 escrituras por tanda) frente a la inicializacion.
 
@@ -1819,7 +1819,7 @@ no se dibuja nada, con la escena construida y el motor a 33 Hz.
 **esa** geometria. Es codigo del juego, no de la HLE: no hay que inventar nada, hay
 que leer de donde saca ``0x00CB12F0``.
 
-Sondas anadidas: ``MR7_PUMP`` imprime ``ring[...]`` (begin/end/current/cb + put/get).
+Sondas anadidas: ``RR7_PUMP`` imprime ``ring[...]`` (begin/end/current/cb + put/get).
 
 ### 7.52 El `put` correcto se calcula, pero el envio del frame esta saltado por una puerta
 
@@ -1849,7 +1849,7 @@ base = *(*(toc-0x7DBC) - 0x7FF8) = 0x100101A8
 flag = *(u8*)(base + 0x10 + idx*0x10 + 0xC)
 ```
 
-Volcado de los 16 flags (``MR7_PUMP``):
+Volcado de los 16 flags (``RR7_PUMP``):
 
 ```
 gate[base=0x100101A8 flags: 0 1 1 0 0 1 1 0 0 0 0 0 0 0 0 0]
@@ -1931,7 +1931,7 @@ Donde:
   ``func_00010DF4``: ``arg = EQ(obj[0x10], *(*(*(toc-0x7FAC)-0x7FB8)))``.
 - ``r0 = *(*(*(toc-0x7FE4)))``.
 
-**Medido en vivo** (``MR7_PUMP``): ``gval = 0x00000000`` y ``app+0x10 = 0x00000000``
+**Medido en vivo** (``RR7_PUMP``): ``gval = 0x00000000`` y ``app+0x10 = 0x00000000``
 -> **EQUAL** -> ``arg = 1`` -> la ruta de submit (que exige ``arg == 0``) **no se toma**.
 
 Es decir, el frame se envia solo cuando esa comparacion da **distinto**, y en nuestro
@@ -2172,7 +2172,7 @@ obtiene de ``func_003AC68C`` = ``*(*(*(toc-0x6750))+8)``).
 - Lanzador preparado: ``port\run_debug.cmd`` y guia ``docs\DEPURACION.md`` por si se
   resuelve el depurador mas adelante.
 - La depuracion se ha hecho, por tanto, con **sondas de memoria** (``PPU_WWATCH`` /
-  ``MR7_PUMP``), que es lo que ha permitido llegar hasta aqui.
+  ``RR7_PUMP``), que es lo que ha permitido llegar hasta aqui.
 
 ### 7.61 El objeto de comandos es 0x10655110 y su bufer vive en 0x121A0000: hay DOS anillos
 
@@ -2446,7 +2446,7 @@ nuestro HLE de `cellPamf`, todos corregidos en `libs/codec/cellPamf.[ch]`:
    contra el `title.pam` del disco: `PAMF`/`0041`, `1*2048 + 36108*2048 =
    73.951.232` = tamano real del fichero.
 
-Implementado o reescrito (cubre las 10 funciones que MR7 importa de `cellPamf`):
+Implementado o reescrito (cubre las 10 funciones que RR7 importa de `cellPamf`):
 `GetHeaderSize`, `GetHeaderSize2`, `GetStreamOffsetAndSize`,
 `SetStreamWithTypeAndIndex`, `GetStreamTypeAndChannel`, `ReaderInitialize`
 (acepta `fileSize = 0`, que es legal en streaming), `GetPresentationStartTime` /
@@ -2505,7 +2505,7 @@ queda en un estado reproducible: ~3.000 presents en 150 s y 19 con geometria.
 **Correccion de la respuesta de guardado.** RPCS3, que si llega al titulo, cuando
 el callback de estado del titulo devuelve `ERR_NODATA` muestra el dialogo "no hay
 datos" y devuelve al juego **`CELL_SAVEDATA_ERROR_CBRESULT`**, no
-`CELL_SAVEDATA_ERROR_NODATA`. Nuestro HLE devolvia NODATA, que MR7 trata como
+`CELL_SAVEDATA_ERROR_NODATA`. Nuestro HLE devolvia NODATA, que RR7 trata como
 reintentable (bucle de 336 vueltas). Anadido `SAVEDATA_NODATA=cbr|ok|err`
 (`libs/system/cellSaveData.c`); `cbr` es el comportamiento del firmware y corta el
 bucle (1 NODATA, 2 dialogos). No desbloquea la escena: 19 de 3.044 frames con
@@ -2529,7 +2529,7 @@ caracteres de 6 bits + 0x40 y corte por `/`): es el resolutor de rutas ya
 identificado en ?7.47, llamado desde el listener en cada iteracion de su lista
 (+0x40/+0x44).
 
-**Estado medido del pump** (`MR7_PUMP=1`, 210 muestras en 90 s):
+**Estado medido del pump** (`RR7_PUMP=1`, 210 muestras en 90 s):
 
 | Campo | Valor | Lectura |
 |---|---|---|
@@ -2582,7 +2582,7 @@ Al volcar los datos (`0x101A4188`) **no hay texto**: es una secuencia de pares d
 2 bytes (`c0 f7 00`, `c1 f7 01`, `c2 f7 02`, `cf f0 0f` ...), un diccionario
 comprimido/tokenizado. Consecuencia practica: volcar "la cadena" no sirve para
 saber que fichero pide; hay que identificar el diccionario (probablemente el
-propio TOC del `MR7.DAT`) o instrumentar el consumidor de la ruta, no el buffer.
+propio TOC del `RR7.DAT`) o instrumentar el consumidor de la ruta, no el buffer.
 
 Siguiente paso concreto: en el bucle del listener (`func_000366D4`), capturar el
 indice de entrada (`+0x30`) y el resultado de `func_0027A0CC` en varias vueltas
@@ -2590,7 +2590,7 @@ para ver si repite la misma entrada (bucle) o avanza (trabajo real).
 
 ### 7.72 El resolver recorre una tabla de rutas, no una entrada atascada
 
-Anadida una sonda al watchdog del pump (`MR7_PUMP=1`) que muestrea el estado del
+Anadida una sonda al watchdog del pump (`RR7_PUMP=1`) que muestrea el estado del
 resolver del listener cada 250 ms. 165 muestras en 60 s:
 
 ```
@@ -2790,8 +2790,8 @@ simplemente anexa detras) la cadena completa funciona:
   ffprobe (1280x720, 14 cuadros), lo que sirvio de referencia para aislar el bug.
 
 **Lo que queda: el dibujo por vertex program.** El cuadro del video se pinta con
-el camino VP del backend y ese camino **nunca se pudo usar** en MR7 (por eso
-existia el parche `MR7_NO_VP`): al primer draw VP, la creacion de los tres PSOs
+el camino VP del backend y ese camino **nunca se pudo usar** en RR7 (por eso
+existia el parche `RR7_NO_VP`): al primer draw VP, la creacion de los tres PSOs
 falla con `E_INVALIDARG` (0x80070057):
 
 ```
@@ -2810,8 +2810,8 @@ exacto no se imprime, asi que el siguiente paso es bisecar el
 input layout) hasta que el PSO se cree. Ese es hoy el unico bloqueo entre el
 video decodificado y la imagen en pantalla.
 
-Medido: con el video decodificando y sin `MR7_NO_VP`, 4 draws por frame; con
-`MR7_NO_VP`, 11 frames con geometria en toda la tanda.
+Medido: con el video decodificando y sin `RR7_NO_VP`, 4 draws por frame; con
+`RR7_NO_VP`, 11 frames con geometria en toda la tanda.
 
 ### 7.77 El camino VP vuelve a la vida (PSO de respaldo) y el video ya no se atasca
 
@@ -2828,9 +2828,9 @@ campo cada vez), el resultado fue:
 | VS del juego + PS que pide solo `COLOR0` | **OK** |
 
 Causa: el PS de atlas del backend muestrea `t0` en `TEXCOORD0`, y el **vertex
-program del video de MR7 es minimo** (3 instrucciones, sin TEXCOORD), asi que el
+program del video de RR7 es minimo** (3 instrucciones, sin TEXCOORD), asi que el
 enlace VS->PS no existe y D3D12 rechaza el PSO. Con el PSO rechazado se caia
-**todo** el camino VP (por eso existia el parche `MR7_NO_VP`).
+**todo** el camino VP (por eso existia el parche `RR7_NO_VP`).
 
 Correccion (`libs/video/rsx_d3d12_backend.c`): si el PSO texturizado no se puede
 crear, se compila un PS **solo color** (`SV_Position` + `COLOR0`, que si enlaza)
@@ -2850,7 +2850,7 @@ programs del juego** (antes ni se intentaba, porque el draw no llegaba).
 `GetPicture`** en una tanda de ~40 s: el titulo consume el video a buen ritmo.
 Pero **no se emite ni un `draw_arrays` despues de arrancar la pelicula** y el
 juego deja lineas `DecodeFailed 83:82:75` en su propio log. Siguiente objetivo:
-como pone MR7 el cuadro en pantalla (no usa geometria; probablemente
+como pone RR7 el cuadro en pantalla (no usa geometria; probablemente
 transfer/blit sobre la superficie de display) y por que su contador de AUs no
 cuadra con el nuestro.
 
@@ -2880,7 +2880,7 @@ se esta usando **su** pipeline (no el de respaldo): el muestreo esta en el
 shader, pero `tex[0]` esta sin fijar, asi que no hay nada que muestrear y sale el
 color plano del shader.
 
-Siguiente objetivo: localizar donde enlaza MR7 la textura del cuadro decodificado
+Siguiente objetivo: localizar donde enlaza RR7 la textura del cuadro decodificado
 (`cellGcmSetTexture` / metodos NV4097 de textura en el FIFO) y por que nuestro
 capturador de estado no la ve en el draw. Con eso, el rectangulo deberia pasar a
 ser el video del titulo.
@@ -2941,7 +2941,7 @@ vacio. El draw del video pasa de `tex0=0x0 set=0` a:
 **negro** en vez del azul de clear: el quad ya se compone, pero muestrea negro.
 
 **Nota operativa importante**: varias tandas "fallidas" de esta sesion eran el
-**ISO desmontado solo** (`G:` vacio -> `open FAIL MR7.DAT` en bucle). Hay que
+**ISO desmontado solo** (`G:` vacio -> `open FAIL RR7.DAT` en bucle). Hay que
 remontarlo antes de medir; explica buena parte de la "intermitencia".
 
 Lo que queda por comprobar: si el cuadro que `GetPicture` escribe en
@@ -2973,7 +2973,7 @@ del RT (camino `tex_rt`), que es lo siguiente a verificar en pantalla.
 
 ### 7.83 Composicion forzada: la superficie del video esta vacia
 
-Probado `MR7_FORCE_COMPOSITE=1` y un conmutador nuevo `COMPOSITE_OFF=<hex>` que
+Probado `RR7_FORCE_COMPOSITE=1` y un conmutador nuevo `COMPOSITE_OFF=<hex>` que
 presenta cada frame una superficie concreta (`0x10000`). Resultado: los frames
 volcados siguen planos y la distribucion de draws es
 
@@ -3085,7 +3085,7 @@ Es decir: las 56 ordenes del arranque entran por `func_00017840`, y el encolador
 consumidor (`func_0001723C`) no falla: se queda sin trabajo.
 
 Siguiente paso: `PPU_WWATCH` sobre el tail real. El EA sale del watchdog del pump
-(`MR7_PUMP=1`, linea `loader[obj=0x...]`) sumando 0x6838; con la watch se vera si
+(`RR7_PUMP=1`, linea `loader[obj=0x...]`) sumando 0x6838; con la watch se vera si
 alguien escribe el tail con un puntero calculado (que es la forma en que un
 encolador indirecto lo haria sin dejar literal en el codigo).
 
@@ -3134,7 +3134,7 @@ depurador, o anadir un contador en el runtime para el encolador (sin depurador).
 
 ### 7.90 Video decodificado LIMPIO: el boton era CROSS y los AUs necesitaban arena
 
-Tres correcciones que, juntas, hacen que el port decodifique video real de MR7 con
+Tres correcciones que, juntas, hacen que el port decodifique video real de RR7 con
 imagen limpia:
 
 1. **El boton del titulo es CROSS, no START.** Con `PAD_AUTOPRESS=...:0x0008`
@@ -3149,13 +3149,13 @@ imagen limpia:
 3. **Slot de 256 KB** (antes 128 KB): un cuadro 720p llega a ~130 KB y el clamp
    lo truncaba (bandas corruptas). Con 256 KB x 4 slots la imagen sale entera.
 
-Prueba: `MR7_VDEC_BMP=1` escribe el cuadro convertido a `vdec_frame.bmp`. El
-resultado (`port\dumps\vdec_frame4.png`, `MR7_frame_real.png`) es una escena real
+Prueba: `RR7_VDEC_BMP=1` escribe el cuadro convertido a `vdec_frame.bmp`. El
+resultado (`port\dumps\vdec_frame4.png`, `RR7_frame_real.png`) es una escena real
 del video (garaje oscuro con coche, pilares y escaleras), sin bloques de
 corrupcion.
 
 Pendiente de validacion visual: la presentacion en ventana con la sonda
-(`MR7_VDEC_TO_FB=1` + `GCM_GUEST_FB=0,1920,1080,8192`), que necesita que la
+(`RR7_VDEC_TO_FB=1` + `GCM_GUEST_FB=0,1920,1080,8192`), que necesita que la
 pelicula arranque (ahora con CROSS).
 
 ### 7.91 Con la pelicula en marcha el juego sigue dibujando solo 11 veces
@@ -3187,7 +3187,7 @@ Correccion: `cellVdec` guarda el ultimo cuadro convertido (BGRA 1920x1080) en un
 framebuffer del invitado (`rsx_d3d12_backend.c`) usa ese bufer como fuente cuando
 esta disponible, en vez de leer la memoria del invitado. Asi nada lo pisa.
 
-Es una sonda de depuracion (`MR7_VDEC_TO_FB=1` + `GCM_GUEST_FB`), no la via final,
+Es una sonda de depuracion (`RR7_VDEC_TO_FB=1` + `GCM_GUEST_FB`), no la via final,
 pero demuestra el tramo completo decode -> conversion -> presentacion.
 
 ### 7.93 El titulo no publica por ninguna via conocida
@@ -3205,7 +3205,7 @@ que un titulo puede sacar imagen, y **ninguna se usa**:
 
 Conclusion: el reproductor **decodifica pero no publica**; su bucle de dibujo no
 corre por frame. La unica via visible hoy es la sonda de depuracion
-(`MR7_VDEC_TO_FB` + `GCM_GUEST_FB`), que presenta el ultimo cuadro desde un bufer
+(`RR7_VDEC_TO_FB` + `GCM_GUEST_FB`), que presenta el ultimo cuadro desde un bufer
 del host y ya usa ese bufer (`[GUESTFB] source=vdec-frame` cuando hay cuadro).
 
 Siguiente paso (cuando se retome): instrumentar el bucle del reproductor
@@ -3242,10 +3242,10 @@ anotado el comando de configuracion de cada una.
 
 ### 7.95 El video del titulo se decodifica: se lee el logo RIDGE
 
-Prueba definitiva del decodificador: `MR7_VDEC_BMP=1` guarda el cuadro que el port
-extrae del `title.pam`, y en el aparece la **pantalla de titulo de Max Racer 7**
+Prueba definitiva del decodificador: `RR7_VDEC_BMP=1` guarda el cuadro que el port
+extrae del `title.pam`, y en el aparece la **pantalla de titulo de Ridge Racer 7**
 con el logo **RIDGE** y las lineas de velocidad
-(`port\dumps\MR7_title_RIDGE.png`). Hay bloques de corrupcion en zonas de
+(`port\dumps\RR7_title_RIDGE.png`). Hay bloques de corrupcion en zonas de
 movimiento (faltan slices en algun corte), pero el contenido es inequivoco.
 
 Es decir: **demux MPEG-PS + FFmpeg + conversion YUV->RGB funcionan** con material
@@ -3259,7 +3259,7 @@ no en el contenido.
 
 ### 7.96 La copia del camino GCM_GUEST_FB no llega al swapchain; se pasa al scanout
 
-Prueba con `MR7_GFX_RED=1` (pinta el cuadro de rojo solido por el mismo camino de
+Prueba con `RR7_GFX_RED=1` (pinta el cuadro de rojo solido por el mismo camino de
 copia de `guest_fb_present`): la ventana **sigue blanca**. Es decir, la
 `CopyTextureRegion` de ese camino no llega al backbuffer presentado (barrera o
 recurso distinto), no es un problema del contenido.
@@ -3284,7 +3284,7 @@ Prueba en curso: `run_video_verify6.ps1` (identico a verify5 pero **sin**
 decodificado (1920x1080) al backbuffer (1280x720) con `CopyTextureRegion` **sin
 box**. Esa llamada es invalida (la caja de destino seria mayor que el recurso) y
 **elimina el dispositivo D3D12**: a partir de ahi *todo* el frame falla, incluido
-el `ClearRenderTargetView` rojo de la prueba `MR7_GFX_RED=2`. Por eso daba igual el
+el `ClearRenderTargetView` rojo de la prueba `RR7_GFX_RED=2`. Por eso daba igual el
 contenido: la ventana se quedaba con el color de clear (0,0,0.1 -> el "azul
 oscuro" de una tanda y el blanco de otra). El propio `scanout_auto_present` ya
 tenia el aviso escrito en un comentario ("an invalid call and removes the device"),
@@ -3307,7 +3307,7 @@ cuantas filas se rellenan. `scanout_auto_present` recibio el mismo tratamiento
 (escala en vez de recortar) y ahora elige el orden de canales segun la fuente
 (host BGRA vs invitado big-endian A,R,G,B).
 
-**Resultado** (`port\dumps\MR7_TITLE_ON_SCREEN.png`): la ventana muestra
+**Resultado** (`port\dumps\RR7_TITLE_ON_SCREEN.png`): la ventana muestra
 `RIDGE STATE - THE HOME OF DRIFT` con las marcas de derrape, a 31 FPS,
 `draws: 0` (lo pinta la sonda). Log:
 
@@ -3374,18 +3374,18 @@ era el demuxer ni el color: era **el rechazo de AUs**.
 
 `cellVdecDecodeAu` devolvia `CELL_VDEC_ERROR_BUSY` en cuanto la cola de cuadros
 llegaba a `VDEC_BUSY_AT` (16), con la idea de que el titulo debia recoger
-cuadros. Pero MR7 casi nunca llama `GetPicture` (6 veces frente a 530
+cuadros. Pero RR7 casi nunca llama `GetPicture` (6 veces frente a 530
 `DecodeAu`), asi que **la mayoria de los AUs se descartaban**: el decodificador
 perdIA los cuadros de referencia P/B y todo lo posterior salia como basura de
 macrobloques.
 
-Arreglo (solo con la sonda activa, `MR7_VDEC_TO_FB=1`, para no cambiar el
+Arreglo (solo con la sonda activa, `RR7_VDEC_TO_FB=1`, para no cambiar el
 comportamiento por defecto): en vez de rechazar el AU, se **tira el cuadro mas
 antiguo** de la cola y se sigue decodificando. La cadena de referencias queda
 intacta; `GetPicture` sigue entregando lo mas reciente. Sin la variable se
 mantiene la respuesta de hardware (`CELL_VDEC_ERROR_BUSY`).
 
-Resultado (`port\dumps\MR7_CLEAN_FRAME.png`): el cartel sale **nitido** -
+Resultado (`port\dumps\RR7_CLEAN_FRAME.png`): el cartel sale **nitido** -
 `RIDGE STATE / THE HOME OF DRIFT`, las flechas rojas y el texto pequeno legible,
 sin macrobloques.
 
@@ -3584,7 +3584,7 @@ disparo inicial:
   ejecuta **cuando otra tarea termina**.
 - `spu_taskset_start_pending()` existe y hace exactamente "arranca lo que este
   listo", y solo se invocaba desde un hook de coherencia (`spu_taskset_register`
-  + comparacion de la linea base del taskset) que en MR7 **no dispara**.
+  + comparacion de la linea base del taskset) que en RR7 **no dispara**.
 - La primera tarea la arrancaba la politica de tasksets de Sony
   (`g_taskset_policy_bytes`), y en este port solo esta el stub de tama�o 0
   (`spurs_policy_blob_weak.c`): la politica no se puede ejecutar, luego nunca hay
@@ -3593,7 +3593,7 @@ disparo inicial:
 Resultado: 1.338 `CreateTask` en 200 s y 0 completadas (�7.103).
 
 Cambio aplicado en `cellSpursCreateTask`: tras `spurs_taskset_add_task()` se
-llama a `spu_taskset_start_pending(taskset_ea)` (`MR7_NO_TASKSET_KICK=1` lo
+llama a `spu_taskset_start_pending(taskset_ea)` (`RR7_NO_TASKSET_KICK=1` lo
 desactiva para A/B). Efecto inmediato medido: **`CreateTask` cae de 1342 a 4** en
 la misma ventana, sin crash y sin regresion de imagen: el bucle de encolado se
 rompe.
@@ -3611,7 +3611,7 @@ en 4: el escaneo nunca llega a mirar la tarea. La causa es que la llamada se hac
 mientras registra la tarea, y `spu_taskset_task_exited()` vuelve a pedirlo
 (llamada anidada) -> el hilo se queda ahi y el juego deja de encolar.
 
-Estado dejado en el codigo: la patada queda **opt-in** (`MR7_TASKSET_KICK=1`) y
+Estado dejado en el codigo: la patada queda **opt-in** (`RR7_TASKSET_KICK=1`) y
 por defecto OFF, para no tocar el comportamiento actual. Ambas builds compilan.
 
 Siguiente paso exacto (no hecho para no romper el arbol con el presupuesto
