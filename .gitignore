@@ -1,0 +1,7 @@
+*.iso
+*.elf
+*.bmp
+*.png
+*.log
+build/
+build_dbg/
