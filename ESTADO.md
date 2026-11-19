@@ -9,13 +9,13 @@ ejecutado contra datos reales o una prueba automatizada reproducible.
 
 | Elemento | Evidencia |
 |---|---|
-| Disco BCES00009 y árbol de archivos | `racermax7 --probe G:\` |
+| Disco BCES00009 y árbol de archivos | `maxracer7 --probe G:\` |
 | Metadatos PARAM.SFO | 10 entradas, título/ID/versión |
 | SELF retail cifrado | cabecera SCE, key rev 1, 8 segmentos cifrados |
 | Arquitectura PS3 (Cell/RSX) | documentación y estructura del ELF |
 | Formato nuSound2 | vgmstream + extracción real |
 | Formato PAMF 4.1 | cabecera real + RPCS3 |
-| Formato RM7.DAT/TOC | RRUnpacker + estructura del ELF |
+| Formato MR7.DAT/TOC | RRUnpacker + estructura del ELF |
 | RRLZ | documentación + implementación |
 | Rendimiento original (1080p60) | Digital Foundry + SFO |
 | ps3recomp | repositorio, docs y build local |
@@ -25,7 +25,7 @@ ejecutado contra datos reales o una prueba automatizada reproducible.
 | Descifrado del ELF | RPCS3 `--decrypt` sobre la copia del usuario; SHA-256 `5FAA5AF9…4B03D5` |
 | Loader PPU | 14.067 funciones, entry `0x1022C`, TOC `0x4EEA88` |
 | Imports | 262 en 23 librerías; 189/262 con handler HLE |
-| TOC real de RM7.DAT | `0x630128`, 13.313 archivos, 2.139 contenedores, ratio 1.0 |
+| TOC real de MR7.DAT | `0x630128`, 13.313 archivos, 2.139 contenedores, ratio 1.0 |
 | Extracción DAT | `DB` (13 archivos) y `SoundConfig_Free` (2) con RRLZ |
 | Imágenes SPU | 42, 1.005.116 bytes, liftadas por el scaffold |
 | Lifter PPU | 14.834 funciones, 9 TUs, ~1,5M líneas |
@@ -58,7 +58,7 @@ ejecutado contra datos reales o una prueba automatizada reproducible.
 | Parser NUB + extracción | `src/assets/nub.*` |
 | Parser PAMF | `src/assets/pamf.*` |
 | Esqueleto DAT | `src/assets/dat.*` |
-| TOC + extracción DAT | `tools/racermax_dat.py` |
+| TOC + extracción DAT | `tools/maxracer_dat.py` |
 | RRLZ | `tools/rrlz.py` |
 | PAMF → MPEG-PS | `tools/pamf_extract.py` |
 | Tests sintéticos | `tools/test_formats.py` |
@@ -67,7 +67,7 @@ ejecutado contra datos reales o una prueba automatizada reproducible.
 
 | Artefacto | Resultado |
 |---|---|
-| `racermax7.exe` | 339.968 bytes, Clang 22/MinGW, sin errores |
+| `maxracer7.exe` | 339.968 bytes, Clang 22/MinGW, sin errores |
 | `libps3recomp_runtime.a` | 2.875.548 bytes, 160/160 tareas |
 | Backend D3D12 de ps3recomp | compilado (con avisos no bloqueantes) |
 | Lift PPU | 9 TUs, `clang++ -fsyntax-only` sin errores |
@@ -85,17 +85,17 @@ ejecutado contra datos reales o una prueba automatizada reproducible.
 | Extracción DJ (3 tonos) | 273,63 KiB; FFprobe/FFmpeg: PCM 44,1 kHz mono |
 | PAMF → MPEG-PS | FFprobe: mpeg2video 1280×720 29,97 |
 | `tools/test_formats.py` | RRLZ, TOC, extracción 60 archivos: OK |
-| `racermax_dat.py locate` sobre SELF | falla limpiamente: “not an ELF” |
+| `maxracer_dat.py locate` sobre SELF | falla limpiamente: “not an ELF” |
 | Primer arranque nativo | D3D12 + GCM 1080p + cellFont; se bloquea en `cellFont` |
 | `sys_mempool_*` | 4 pools creados; `try_allocate` devuelve bloques válidos |
-| `RM7_FONT_SEED=1` | sonda: elimina nulls de lectura; quedan escrituras NULL y espera del semáforo 4 |
-| VFS / ISO montado | requisito: `PS3_VFS_ROOT=G:/`; sin montar, bucle de `open FAIL RM7.DAT` |
-| Pipeline de carga/render | `Draw Thread`, `File Thread`, `Initialize Thread`; el loader lee `RM7.DAT` real hasta 41 MB |
+| `MR7_FONT_SEED=1` | sonda: elimina nulls de lectura; quedan escrituras NULL y espera del semáforo 4 |
+| VFS / ISO montado | requisito: `PS3_VFS_ROOT=G:/`; sin montar, bucle de `open FAIL MR7.DAT` |
+| Pipeline de carga/render | `Draw Thread`, `File Thread`, `Initialize Thread`; el loader lee `MR7.DAT` real hasta 41 MB |
 | SPU `bnusCore` | hilo SPU liftado ejecutándose (`entry=0x90`) |
 | Primeros frames D3D12 | `CLEAR_SURFACE` + `DRAW_ARRAYS`; PSO falla con `0x887A0005` (reason `INVALID_CALL`) |
 | Debug layer D3D12 | no disponible (`0x887A002D`); sin admin para Graphics Tools |
 | PSO FP | **resuelto**: el fallo era el scanout 1920×1080 sobre backbuffer 1280×720; PSOs listos |
-| Geometría FIFO RM7 | anillo 64 KB EA `0x11100000` → IO `0x0000`; buffers enlazados en IO `0x00CB0000` y `0x010A0000` |
+| Geometría FIFO MR7 | anillo 64 KB EA `0x11100000` → IO `0x0000`; buffers enlazados en IO `0x00CB0000` y `0x010A0000` |
 | Desvío del walker | **corregido**: 0 saltos a datos de vértices; resync acotado al `put` vivo |
 | Backbuffer | negro; el juego se detiene en carga (lecturas del DAT paradas en 41 MB) |
 | Siguiente bloqueo | estado de inicialización del juego: frame de 1 triángulo negro, sin texturas, vídeo en 720×480 |
@@ -105,18 +105,18 @@ ejecutado contra datos reales o una prueba automatizada reproducible.
 | Presentación | **verificada**: enlaza el RT 1280×720 como textura (unit 0, off `0x10000`) y dibuja el triángulo de blit |
 | Contenido | los assets de carga (`Obj_Loading`/`Tex_Loading`, ~20 MB) ya están leídos pero nunca se dibujan |
 | Loader | espera en `sys_cond_wait`; productor identificado (`func_0003632C` + resolutor de rutas `func_0027A0CC`) |
-| Mapa por `lr` | `RM7_LRS=1`: el loader **alterna** bucle/resolución (no está bloqueado); el `File Thread` sigue ocioso |
+| Mapa por `lr` | `MR7_LRS=1`: el loader **alterna** bucle/resolución (no está bloqueado); el `File Thread` sigue ocioso |
 | Lecturas del DAT | **corregido**: con `FS_READ_ALL=1` el total real llega a **45.955.072 B** (el log sólo imprimía 50 líneas) |
 | Punto de parada | dentro de `Obj_RBTop`, antes de `Obj_OnlineRoomSearch`; sin EBADF ni lecturas cortas |
 | Jobs del File Thread | dos tipos alternos (`0x139C0` lector, `0x140C8`); recuento coherente con las lecturas, sin livelock |
 | Motores 2D | descartados: `GCM2D_TRACE` no registra ni una llamada (subcanales 2–6 = 0) |
-| Callback de `sceNp` | ahora se notifica el estado actual (OFFLINE); RM7 no cambia por ello |
+| Callback de `sceNp` | ahora se notifica el estado actual (OFFLINE); MR7 no cambia por ello |
 | Input | descartado: `PAD_AUTOPRESS` y `YDKJ_INJECT_PAD` (START+CROSS) no cambian nada |
 | `put` del GCM | **congelado** en `0x00CB12F0`: el hilo de dibujo deja de construir el frame a medias |
 | `current` del GCM | **congelado** en `0x111001A4`: el invitado tampoco reserva; no es sólo el walker |
 | Draw Thread | en `func_000C5680` → `func_000E5998` (sprites, 2× `AddressToOffset`), sin flush |
 | Referencia RPCS3 | arranca `BCES00009` pero aborta por **firmware incompleto**; no usable sin el del usuario |
-| Firmware (usuario) | instalado en RPCS3 local (4.92); **RM7 llega a la pantalla de título a 74 fps** |
+| Firmware (usuario) | instalado en RPCS3 local (4.92); **MR7 llega a la pantalla de título a 74 fps** |
 | Objetivo visual | `docs/referencia_titulo_rpcs3.png` (captura local, no distribuible) |
 | Datos leídos | RPCS3: 77 MB hasta el título; nuestro port: 46 MB |
 | `put` | **corregido**: el invitado SÍ lo publica en `0x20002000` (`GCM_CONTROL_GUEST_ADDR` usa `ppu_hle_inject_base`, no `0x0F80…`) |
@@ -130,15 +130,15 @@ ejecutado contra datos reales o una prueba automatizada reproducible.
 | Bucle real | `func_000E6CBC+0x2B7`; cola `loc_000E6F4C` = `esperar(0x3B92B8)` + `recorrer(0x41ED2C)` en `goto` infinito (render loop) |
 | Flush | `func_000BCAE4` se invoca desde `func_000BE0CC` vía el thunk virtual `func_000C474C` |
 | Predicado | verificado en el binario: `0xE7DC0` = `li r3,1; blr` (método por defecto) |
-| Objeto del bucle | `0x107C4780` está **a cero** (`RM7_MEMDUMP`); el recorrido no puede producir nada |
+| Objeto del bucle | `0x107C4780` está **a cero** (`MR7_MEMDUMP`); el recorrido no puede producir nada |
 | TTY de RPCS3 | activados `sys_rsx`/`cellFs`/etc. a Trace: **no añaden trazas**; la comparación útil es de memoria |
 | Mesa de 16 slots | `base[0xC0 + i*4]` está **toda a cero** (0xD0 bytes); el juego recorre una estructura vacía |
 | Constructor | `func_000180F0` (construye la mesa en `obj+0xC0`) **nunca se llama**; su único OPD es `0x4CB938` |
 | Hilo que gira | tid 11 (Initialize, func_0003833C): ~1,63 M mutex_lock/mutex_unlock por segundo |
 | Espera | sys_cond_wait (107) llamado **1 vez** en total: el bucle salta la espera porque g->[4] = 1 |
 | Salida del bucle | sólo si g->[0] == 0x10; vale 0 y nada lo escribe (verificado con WWATCH y contra el binario) |
-| Defecto del toolkit | sys_cond_wait lee el timeout de gpr[4] (mutex) en vez de gpr[5]; **no aplicado** (RM7 dejaría de bloquear) |
-| Carga | 69 lecturas de `RM7.DAT` = 45.955.072 B y despues **nada** (30 s sin avanzar); cero `lseek` |
+| Defecto del toolkit | sys_cond_wait lee el timeout de gpr[4] (mutex) en vez de gpr[5]; **no aplicado** (MR7 dejaría de bloquear) |
+| Carga | 69 lecturas de `MR7.DAT` = 45.955.072 B y despues **nada** (30 s sin avanzar); cero `lseek` |
 | File Thread | recibe exactamente 69 trabajos (`func_000139C0`), iguales a las 69 lecturas: deja de recibir trabajo, no falla |
 | Listener del bucle | **existe** (`g->[8] = 0x1042C020` -> `func_000366D4`); el bucle del frontend corre su actualizacion por frame |
 | Correccion | los volcados que mostraban `g->[8] = 0` eran de ejecuciones sin ISO montado: afirmacion retirada |
@@ -163,7 +163,7 @@ ejecutado contra datos reales o una prueba automatizada reproducible.
 | Correccion | no es un atasco de E/S: falta la **transicion** del frontend a construir la escena |
 | Descartado | `vtbl=0` (sonda heredada de otro titulo), TTY del juego (no imprime), `+6834` en el objeto equivocado |
 | Datos guardados al arrancar | `AutoLoad(dir='BLJS10001GAME')` -> `funcStat` del juego devuelve **-4** (sin datos); una sola vez, sin bucle ni espera |
-| Entorno de pruebas | el ISO se desmonta solo entre tandas; sin `G:` el juego reintenta la apertura de `RM7.DAT` ~1.000.000 veces (hay que remontar antes de medir) |
+| Entorno de pruebas | el ISO se desmonta solo entre tandas; sin `G:` el juego reintenta la apertura de `MR7.DAT` ~1.000.000 veces (hay que remontar antes de medir) |
 | Causa primaria | la **parada de la carga** en 46 MB: el constructor es consumidor de ese arranque |
 | Callback de anillo | nunca se invoca (`RECYCLE_DBG`: 0 llamadas); `put` vive en buffers propios del juego, no en el anillo de IO 0 |
 | Fuentes | `cellFontFT` es stub; `FONT_TTF=<ruta>` añade rasterizado sustituto opt-in (no empaquetado) |
@@ -202,12 +202,12 @@ ejecutado contra datos reales o una prueba automatizada reproducible.
 | `CellDmuxAuInfo` | **corregido**: 0x28 bytes, `auMaxSize`/`isRap`/`pts{upper,lower}` |
 | Video | decodifica ~1000 AUs en 75 s **sin errores de libavcodec**; 4 draws por frame |
 | Pendiente inmediato | la ventana sigue negra: falta el tramo `cellVdecGetPicture` -> textura RSX -> composicion |
-| `RM7_NO_VP` | **contraproducente**: con el activo no se dibuja el video (11 frames en total) |
+| `MR7_NO_VP` | **contraproducente**: con el activo no se dibuja el video (11 frames en total) |
 
 | Video decodificado | **si**: `picture 1280x720` y `GetPicture` con formato 3 (YUV420 planar), 0 errores |
 | Bug del buffer | **corregido**: mover la cola a offset 0 machacaba los AUs publicados (`AVERROR_INVALIDDATA`) |
 | Bloqueo actual | los PSO del camino **VP** fallan con `E_INVALIDARG` (0x80070057) -> ningun draw del video llega a pantalla |
-| Por eso `RM7_NO_VP` | el parche antiguo desactivaba el unico camino que puede pintar el video |
+| Por eso `MR7_NO_VP` | el parche antiguo desactivaba el unico camino que puede pintar el video |
 
 | Camino VP | **desbloqueado**: PSO de respaldo solo-color cuando el PS de atlas no enlaza (el VS del video no emite TEXCOORD) |
 | Fragment programs | **se compilan** ahora (`[FP] guest FP pipeline ready`) al llegar el draw al backend |
@@ -225,16 +225,16 @@ ejecutado contra datos reales o una prueba automatizada reproducible.
 | Boton del titulo | **CROSS** (0x4000), no START: con START la pelicula no arrancaba |
 | Video | **decodificado limpio**: AUs con arena propia (4 slots de 256 KB) -> escena real en `dumps\vdec_frame4.png` |
 | Publicacion | el titulo **no publica**: 0 flips, 0 blits NV3089, 0 escrituras de CPU al framebuffer, 11 draws |
-| Sonda visible | `RM7_VDEC_TO_FB` + `GCM_GUEST_FB` presenta el cuadro desde un bufer del host |
+| Sonda visible | `MR7_VDEC_TO_FB` + `GCM_GUEST_FB` presenta el cuadro desde un bufer del host |
 
 | Build de release | **corregida**: se configuro sin FFmpeg (`PS3RECOMP_FFMPEG_RUNTIME=OFF`) -> tus pruebas no decodificaban video |
 | Sonda de video | `[vdecprobe] push=1 w=1280 h=720` y `BMP=2,7 MB` en la release corregida |
 | Presentador | `[GUESTFB] USING VDCE FRAME`: la ventana usa el cuadro decodificado desde el bufer del host |
 
-| **Video del titulo** | **se decodifica el logo RIDGE** (`dumps\RM7_title_RIDGE.png`): demux+FFmpeg+conversion correctos |
+| **Video del titulo** | **se decodifica el logo RIDGE** (`dumps\MR7_title_RIDGE.png`): demux+FFmpeg+conversion correctos |
 | Presentacion en ventana | sigue blanca: `GUESTFB` usa el bufer del host pero la copia D3D12 no llega al swapchain |
 
-| **IMAGEN EN VENTANA** | **SI**: se ve la pelicula de titulo (`RIDGE STATE - THE HOME OF DRIFT`), `dumps\RM7_TITLE_ON_SCREEN.png` |
+| **IMAGEN EN VENTANA** | **SI**: se ve la pelicula de titulo (`RIDGE STATE - THE HOME OF DRIFT`), `dumps\MR7_TITLE_ON_SCREEN.png` |
 | Causa del blanco | `CopyTextureRegion` 1920x1080 -> 1280x720 sin box = llamada invalida -> **dispositivo D3D12 eliminado** (todo el frame fallaba) |
 | Presentador | escala en CPU al tamano del backbuffer y copia una caja valida (`[GUESTFB] copy 1280x720 -> backbuffer 1280x720`) |
 | Captura de ventana | requiere `HWND_TOPMOST` + ocultar la consola; `SetForegroundWindow` no basta |
@@ -246,7 +246,7 @@ ejecutado contra datos reales o una prueba automatizada reproducible.
 | Flips del juego | 0 (el `GetPicture=6` del log es el tope de lineas, no el numero real) |
 | Bloqueo del render | hilo Draw espera `sem=5`; SPU `bnusCore` recibe `CELL_ESRCH` en `stop 0x110` (clave `nuAS` inexistente) |
 
-| Calidad del video | **corregida**: la corrupcion por macrobloques era descartar AUs (`BUSY`); ahora se tira el cuadro mas antiguo y la imagen sale nitida (`dumps\RM7_CLEAN_FRAME.png`) |
+| Calidad del video | **corregida**: la corrupcion por macrobloques era descartar AUs (`BUSY`); ahora se tira el cuadro mas antiguo y la imagen sale nitida (`dumps\MR7_CLEAN_FRAME.png`) |
 
 | FIFO GCM | se drena bien: `getoff == put`, 13,3 MB de comandos consumidos |
 | Circuito de eventos | `port6 -> q=7` **nunca envia**; el hilo update sondea q=7 cada 5,3 ms y el SPU gira esperando trabajo |

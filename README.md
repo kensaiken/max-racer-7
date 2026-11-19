@@ -1,6 +1,6 @@
-﻿# Racer Max 7 — port nativo (documentacion)
+﻿# Max Racer 7 — port nativo (documentacion)
 
-Registro tecnico del port nativo de **Racer Max 7** (titulo de carreras de PS3)
+Registro tecnico del port nativo de **Max Racer 7** (titulo de carreras de PS3)
 a PC, escrito en C/C++ con recompilacion estatica del ejecutable original.
 
 ## Estado actual

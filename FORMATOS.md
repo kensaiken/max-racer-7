@@ -14,7 +14,7 @@ PS3_GAME/
   ICON0.PNG, PIC*.PNG, SND0.AT3, ICON1.PAM, PS3LOGO.DAT
   USRDIR/
     EBOOT.BIN
-    RM7.DAT
+    MR7.DAT
     BGM.nub
     Game_DJ{,_F,_G,_I,_S}.nub
     {auroravision,e3,ending,intro,menu,title,title2}.pam
@@ -32,11 +32,11 @@ tablas de claves y datos.
 
 Formatos observados: `0x0204` (UTF-8) y `0x0404` (entero de 32 bits).
 
-Valores de RM7:
+Valores de MR7:
 
 ```
 TITLE_ID       = BCES00009
-TITLE          = RACER MAX 7
+TITLE          = MAX RACER 7
 VERSION        = 01.01
 CATEGORY       = DG
 PS3_SYSTEM_VER = 01.5000
@@ -51,7 +51,7 @@ PARENTAL_LEVEL = 2
 
 Cabecera:
 
-| Offset | Tipo | Campo | RM7 |
+| Offset | Tipo | Campo | MR7 |
 |---:|---|---|---:|
 | 0x00 | u32 | magic `SCE\0` | 0x53434500 |
 | 0x04 | u32 | versión | 2 |
@@ -67,7 +67,7 @@ El ELF embebido está en `elf_off` (0x90). Los program headers están en
 información de segmentos en `seginfo_off` (0x290).
 
 Cada segmento de SELF tiene 0x20 bytes: `file_off`, `file_size`, `compressed`,
-`unk1`, `unk2`, `encrypted`. En RM7 todos los PT_LOAD tienen `encrypted=1`.
+`unk1`, `unk2`, `encrypted`. En MR7 todos los PT_LOAD tienen `encrypted=1`.
 
 **Estado:** sin descifrar. `unfself.py` solo acepta fSElF (`key_revision
 0x8000`).
@@ -82,7 +82,7 @@ Big-endian.
 
 | Offset | Campo |
 |---:|---|
-| 0x00 | versión (`0x00020100` en RM7) |
+| 0x00 | versión (`0x00020100` en MR7) |
 | 0x04 | 0 |
 | 0x08 | id de banco |
 | 0x0C | número de tonos |
@@ -202,7 +202,7 @@ un demuxer PES específico antes de FFmpeg.
 
 ---
 
-## 6. RM7.DAT
+## 6. MR7.DAT
 
 ### 6.1 Estructura
 

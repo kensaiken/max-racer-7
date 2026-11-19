@@ -15,7 +15,7 @@ memoria ya no pueden separar:
 - **No** hace falta configurar VS para lanzar: usa `run_debug.cmd` y luego
   *Depurar > Asociar al proceso* (`Attach to Process`) sobre `MyGameRecomp.exe`.
   VS encontrara el `.pdb` en la misma carpeta.
-- El ISO debe estar montado en `G:` (si no, el juego reintenta abrir `RM7.DAT`
+- El ISO debe estar montado en `G:` (si no, el juego reintenta abrir `MR7.DAT`
   ~1.000.000 de veces y no llega al estado que queremos observar).
 
 ## 2. Breakpoints, en este orden

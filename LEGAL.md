@@ -4,7 +4,7 @@
 
 - Este repositorio **no contiene claves de Sony, firmware, código del juego ni
   activos con copyright**.
-- El usuario debe poseer una copia legítima de Racer Max 7 (BCES00009).
+- El usuario debe poseer una copia legítima de Max Racer 7 (BCES00009).
 - El proyecto no elude protecciones por sí mismo: trabaja sobre un ejecutable ya
   descifrado por el usuario con su propia copia.
 - El ejecutable final no incluirá RPCS3 ni dependerá de él.
@@ -17,7 +17,7 @@ PowerPC y la tabla de imports, que están dentro del payload cifrado. Sin el ELF
 
 - no se puede ejecutar el lifter;
 - no se pueden inventariar imports ni funciones;
-- no se puede localizar la TOC de `RM7.DAT`.
+- no se puede localizar la TOC de `MR7.DAT`.
 
 No se ha intentado romper el cifrado ni se han incluido claves.
 
@@ -47,7 +47,7 @@ claves de su consola. El proyecto no las incluye ni las solicita.
 ### Colocación
 
 ```
-RM7-Native/
+MR7-Native/
   game/
     EBOOT.ELF
 ```
@@ -55,7 +55,7 @@ RM7-Native/
 Comprobar:
 
 ```powershell
-python tools\racermax_dat.py locate --elf game\EBOOT.ELF --dat "G:\PS3_GAME\USRDIR\RM7.DAT" --json game\toc.json
+python tools\maxracer_dat.py locate --elf game\EBOOT.ELF --dat "G:\PS3_GAME\USRDIR\MR7.DAT" --json game\toc.json
 ```
 
 Si el archivo sigue siendo un SELF, la herramienta falla con “not an ELF file”.
@@ -70,7 +70,7 @@ Si el archivo sigue siendo un SELF, la herramienta falla con “not an ELF file�
 
 ### No permitido
 
-- Distribuir `EBOOT.BIN`, `EBOOT.ELF`, `RM7.DAT`, `.nub`, `.pam`, texturas,
+- Distribuir `EBOOT.BIN`, `EBOOT.ELF`, `MR7.DAT`, `.nub`, `.pam`, texturas,
   modelos, música ni voces.
 - Incluir claves, firmware o código propietario de Sony/Namco.
 - Empaquetar los activos extraídos en el instalador.
@@ -97,6 +97,6 @@ proyecto mantiene la misma política.
 
 ## 6. Marcas
 
-“Racer Max”, “Racer Max 7”, “PlayStation” y “Cell” son marcas de sus
+“Max Racer”, “Max Racer 7”, “PlayStation” y “Cell” son marcas de sus
 respectivos propietarios. Este proyecto no está afiliado a Sony, Bandai Namco ni
 NVIDIA.

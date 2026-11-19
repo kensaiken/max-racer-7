@@ -1,5 +1,5 @@
 # Informe técnico — Fase 1
-## Racer Max 7 (PS3, BCES00009) → Windows nativo
+## Max Racer 7 (PS3, BCES00009) → Windows nativo
 
 **Fecha:** 16 de noviembre de 2026  
 **Rol:** ingeniero principal del port  
@@ -9,7 +9,7 @@ herramientas; viabilidad real de la recompilación estática.
 > **ACTUALIZACIÓN (misma fecha):** el bloqueo por cifrado descrito en este
 > informe se resolvió usando RPCS3 `--decrypt` sobre la copia del usuario. El
 > ELF se cargó, se liftaron 14.834 funciones PPU y 42 imágenes SPU, y se localizó
-> la TOC real de `RM7.DAT`. Los resultados y las cifras actualizadas están en
+> la TOC real de `MR7.DAT`. Los resultados y las cifras actualizadas están en
 > [INFORME_FASE4A.md](INFORME_FASE4A.md). Las secciones que dicen “pendiente” o
 > “bloqueado” reflejan el estado anterior al desbloqueo y deben leerse junto con
 > ese informe.
@@ -27,7 +27,7 @@ de **ps3recomp v0.19.0** en esta máquina.
 empezar a recompilar el juego todavía**. El `EBOOT.BIN` de esta copia es un SELF
 retail cifrado (`key_revision 0x0001`, payload cifrado). Sin un `EBOOT.ELF`
 descifrado de la copia legítima del usuario no es posible ejecutar el lifter de
-PPU, inventariar imports ni extraer la tabla de contenidos de `RM7.DAT`.
+PPU, inventariar imports ni extraer la tabla de contenidos de `MR7.DAT`.
 
 **Lo que sí está hecho y probado:**
 
@@ -35,13 +35,13 @@ PPU, inventariar imports ni extraer la tabla de contenidos de `RM7.DAT`.
 - Parser propio de `PARAM.SFO`, SELF, `.nub` y PAMF, integrado en el ejecutable.
 - Extracción de audio verificada con FFmpeg (ATRAC3plus 5.1 y PCM).
 - Extracción de vídeo PAMF a MPEG-PS verificada con FFmpeg (MPEG-2 720p).
-- Herramienta de localización de la TOC de `RM7.DAT` y extractor con RRLZ,
+- Herramienta de localización de la TOC de `MR7.DAT` y extractor con RRLZ,
   validados con un ELF/DAT sintéticos (60 archivos, 10 contenedores).
 - Shell nativo Win32 + D3D11 compilado y ejecutado en la RTX 5070.
 - Runtime de ps3recomp compilada (160/160 tareas) con Clang/MinGW.
 
 **Lo que no está hecho:** no se ha ejecutado el juego, ni una sola instrucción
-del juego. No se ha validado la compatibilidad de ps3recomp con Racer Max 7.
+del juego. No se ha validado la compatibilidad de ps3recomp con Max Racer 7.
 Cualquier afirmación en contrario sería falsa.
 
 ---
@@ -78,7 +78,7 @@ clang-cl + VS 2022; aun así, su runtime se ha compilado con Clang/MinGW (ver
 
 ### 1.3 Disco
 
-Archivo: `C:\Users\User\Desktop\Port  Nativo\Racer Max 7 (Europe) (En,Ja,Fr,De,Es,It).iso`  
+Archivo: `C:\Users\User\Desktop\Port  Nativo\Max Racer 7 (Europe) (En,Ja,Fr,De,Es,It).iso`  
 Tamaño: **8.254.324.736 bytes**. Montado como UDF en `G:\`.
 
 | Archivo | Tamaño | SHA-256 |
@@ -91,7 +91,7 @@ Contenido de `PS3_GAME`:
 ```
 USRDIR/
   EBOOT.BIN          7.887.584
-  RM7.DAT        5.350.496.256
+  MR7.DAT        5.350.496.256
   BGM.nub          615.863.504
   Game_DJ.nub      152.133.088
   Game_DJ_F.nub    134.287.488
@@ -114,7 +114,7 @@ todo el código del título está en `EBOOT.BIN`.
 
 | Clave | Valor |
 |---|---|
-| `TITLE` | `RACER MAX 7` |
+| `TITLE` | `MAX RACER 7` |
 | `TITLE_ID` | **BCES00009** |
 | `VERSION` | `01.01` |
 | `CATEGORY` | `DG` (disco) |
@@ -149,7 +149,7 @@ ha implementado como herramienta propia y no se ha asumido ningún offset ajeno.
 **Estado real (README del proyecto, v0.19.0):** los ports de referencia llegan a
 menús y juego con títulos retail (Tornado Outbreak, The Simpsons Arcade, inFamous,
 Killzone 3, Twisted Metal). La fila de Windows declara “runs a recompiled game”
-para el árbol, pero **no es una promesa de compatibilidad con RM7**.
+para el árbol, pero **no es una promesa de compatibilidad con MR7**.
 
 **Compilación en esta máquina:**
 
@@ -163,18 +163,18 @@ para el árbol, pero **no es una promesa de compatibilidad con RM7**.
   bytes. Avisos no bloqueantes en el backend D3D12 (`#pragma comment` ignorado,
   variables sin usar).
 
-**Limitaciones relevantes para RM7:**
+**Limitaciones relevantes para MR7:**
 
 1. El lifter necesita el ELF descifrado. No hay atajo legal sin él.
-2. `cellSpurs` está marcado como parcial; si RM7 usa SPURS de forma intensiva,
+2. `cellSpurs` está marcado como parcial; si MR7 usa SPURS de forma intensiva,
    es el mayor riesgo de la Fase 4.
 3. `cellPamf` **no parsea correctamente PAMF 4.1**: su implementación asume
    `data_offset` en 0x08, `stream_table` en 0x10 y `num_streams` en 0x14. En
-   RM7, 0x08 es el tamaño de cabecera en unidades de 2048, 0x0C el tamaño de
+   MR7, 0x08 es el tamaño de cabecera en unidades de 2048, 0x0C el tamaño de
    datos y 0x10–0x1F reservado. Nuestro parser sigue la estructura real de
    RPCS3 (`PamfHeader`), y el bug queda documentado para corregirlo upstream.
 4. `cellAdec`/`cellAtrac`/`cellVdec` son parciales y dependen de FFmpeg opcional.
-   RM7 necesita MPEG-2 y ATRAC3plus; el camino viable es FFmpeg (LGPL, cargado
+   MR7 necesita MPEG-2 y ATRAC3plus; el camino viable es FFmpeg (LGPL, cargado
    en runtime, nunca vendorizado).
 5. El build completo del juego requiere dividir la salida del lifter en varias
    traducciones (problema de escala ya señalado por el propio proyecto).
@@ -189,14 +189,14 @@ Repositorio MIT que documenta el `.DAT` de RR6/7/PSP/Vita. Aporta:
 - Confirmación de que **la TOC vive dentro del ejecutable**, no en el `.DAT`.
 
 Limitación: solo trae offsets para las versiones PSN. Para BCES00009 no sirve
-tal cual. Por eso se ha implementado `tools/racermax_dat.py`, que **localiza** la TOC
+tal cual. Por eso se ha implementado `tools/maxracer_dat.py`, que **localiza** la TOC
 en el ELF por estructura y valida la relación entre ambas tablas, sin offsets
 hardcodeados.
 
 ### 2.3 vgmstream
 
 `src/meta/nub.c` documenta el contenedor Namco nuSound2 y cita explícitamente
-Racer Max 7 (PS3) para los códecs WAV, VAG y AT3. Ha servido para fijar:
+Max Racer 7 (PS3) para los códecs WAV, VAG y AT3. Ha servido para fijar:
 
 - Cabecera base: `version` 0x00020100, `data_start`, `header_start`, etc.
 - Entrada de tono: codec en +0x0C, tamaño en +0x14, offset en +0x18,
@@ -220,16 +220,16 @@ funciones, localizar la TOC y analizar el motor.
 
 | Herramienta | Estado |
 |---|---|
-| `racermax7 --probe` | probado con el disco real |
+| `maxracer7 --probe` | probado con el disco real |
 | parsers SFO/SELF/NUB/PAMF | probados con archivos reales |
-| `racermax7 --nub --extract` | PCM/VAG→WAV, ATRAC3→`.at3`; probado + FFmpeg |
-| `tools/racermax_dat.py` | TOC + extracción + RRLZ; probado con datos sintéticos |
+| `maxracer7 --nub --extract` | PCM/VAG→WAV, ATRAC3→`.at3`; probado + FFmpeg |
+| `tools/maxracer_dat.py` | TOC + extracción + RRLZ; probado con datos sintéticos |
 | `tools/pamf_extract.py` | PAMF→MPEG-PS; probado con FFmpeg |
 | `tools/test_formats.py` | 3 pruebas, todas OK |
 
 ---
 
-## 3. Arquitectura PS3 y uso real por Racer Max 7
+## 3. Arquitectura PS3 y uso real por Max Racer 7
 
 ### 3.1 Cell
 
@@ -245,7 +245,7 @@ funciones, localizar la TOC y analizar el motor.
 ### 3.2 RSX
 
 NVIDIA RSX (base NV47/NV40): shaders NV4097, texturas, framebuffers, Z-buffer,
-render-to-texture, comandos GCM. RM7 es un título de lanzamiento con:
+render-to-texture, comandos GCM. MR7 es un título de lanzamiento con:
 
 - **1080p nativo a 60 fps** (confirmado por Digital Foundry y por la máscara de
   resolución del SFO; la máscara por sí sola no lo prueba, pero coincide).
@@ -315,7 +315,7 @@ cifrado. Sin el ELF descifrado, la Fase 4 no puede comenzar.
 
 ## 5. Recursos y formatos (verificado)
 
-### 5.1 `RM7.DAT`
+### 5.1 `MR7.DAT`
 
 - 5.350.496.256 bytes.
 - Sin cabecera ni índice utilizables al principio: empieza con ceros y datos de
@@ -336,7 +336,7 @@ Cabecera base (big-endian):
 
 | Offset | Campo |
 |---:|---|
-| 0x00 | versión (0x00020100 en RM7) |
+| 0x00 | versión (0x00020100 en MR7) |
 | 0x04 | 0 |
 | 0x08 | id de banco |
 | 0x0C | número de tonos |
@@ -416,7 +416,7 @@ PES específico; es una tarea concreta de la Fase 4.
 **Con modificaciones:**
 
 - **ps3recomp**: `cellPamf` 4.1, `cellAdec`/`cellAtrac` y `cellSpurs` necesitan
-  trabajo para RM7. La división de la salida del lifter en varias TU también.
+  trabajo para MR7. La división de la salida del lifter en varias TU también.
 - **RRUnpacker**: su lógica es correcta, pero sus offsets son de PSN; para
   BCES00009 se usa nuestro localizador estructural.
 
@@ -426,7 +426,7 @@ PES específico; es una tarea concreta de la Fase 4.
 ### 6.2 ¿Qué partes del juego podemos recompilar?
 
 - **PPU:** todo el `EBOOT.BIN` (8 segmentos, entry 0x4CB300) una vez descifrado.
-  ps3recomp tiene cobertura de ISA alta (medida en Uncharted, no en RM7); hay que
+  ps3recomp tiene cobertura de ISA alta (medida en Uncharted, no en MR7); hay que
   medirla con `lift_audit.py` y `ppu_disasm.py`. El juego no trae `.sprx`, así
   que no hay módulos de juego externos.
 - **SPU:** no se sabe aún. Hay que extraer imágenes con
@@ -469,7 +469,7 @@ PES específico; es una tarea concreta de la Fase 4.
 ### 6.5 ¿Cómo vamos a adaptar el renderizado RSX?
 
 - Base: `cellGcmSys` + procesador de comandos RSX de ps3recomp + backend D3D12.
-- RM7 es un título de 2006, 1080p60, con iluminación horneada y geometría
+- MR7 es un título de 2006, 1080p60, con iluminación horneada y geometría
   ligera; el esfuerzo principal estará en:
   - traducción de shaders NV4097 (vertex/fragment);
   - render-to-texture (reflejos, blur, pantalla);
@@ -486,11 +486,11 @@ PES específico; es una tarea concreta de la Fase 4.
 
 ### 6.6 ¿Qué servicios de PS3 debemos reconstruir?
 
-Ya presentes en ps3recomp (a validar con RM7): `cellGcmSys`, `cellSysutil`,
+Ya presentes en ps3recomp (a validar con MR7): `cellGcmSys`, `cellSysutil`,
 `cellFs`, `cellPad`, `cellAudio`, `cellVideoOut`, `cellResc`, `cellSync`,
 `cellSpurs`, `cellGame`, `cellSaveData`, `sys_*`, `cellFont`.
 
-Pendientes o parciales que RM7 probablemente necesita:
+Pendientes o parciales que MR7 probablemente necesita:
 
 | Servicio | Estado actual | Trabajo |
 |---|---|---|
@@ -500,12 +500,12 @@ Pendientes o parciales que RM7 probablemente necesita:
 | `cellSpurs` | parcial | scheduler, task sets, señales |
 | `cellAudio` | completo | verificar 5.1/48 kHz y mezcla |
 | `cellPad` | completo | XInput; añadir teclado y mapeo |
-| `cellSaveData` | completo | validar formato de RM7 |
+| `cellSaveData` | completo | validar formato de MR7 |
 | `sys_net`/`sceNp` | completo/parcial | online original probablemente muerto; offline primero |
 
 El inventario definitivo de imports sale de `imports.json` tras descifrar.
 
-### 6.7 ¿Qué dificultades específicas presenta Racer Max 7?
+### 6.7 ¿Qué dificultades específicas presenta Max Racer 7?
 
 1. **Cifrado del EBOOT** (bloqueo actual).
 2. **TOC dentro del ejecutable** y versión retail no soportada por RRUnpacker.
@@ -533,7 +533,7 @@ El inventario definitivo de imports sale de `imports.json` tras descifrar.
 
 Ruta propuesta, en orden:
 
-1. **TOC y activos** (días): `racermax_dat.py locate` sobre el ELF, extraer el `.DAT`,
+1. **TOC y activos** (días): `maxracer_dat.py locate` sobre el ELF, extraer el `.DAT`,
    inventariar coches, circuitos, texturas y audio. Validar que los archivos
    extraídos son coherentes.
 2. **Arranque PPU** (semanas): loader → lifter → enlace → primera llamada HLE.
@@ -567,14 +567,14 @@ no se ha medido.
 | SELF y cifrado | **INVESTIGADO** | key rev 1, sin claves |
 | Formato NUB | **INVESTIGADO / IMPLEMENTADO / PROBADO** | extracción + FFmpeg |
 | Formato PAMF | **INVESTIGADO / IMPLEMENTADO / PROBADO** | cabecera + MPEG-PS |
-| TOC de RM7.DAT | **IDENTIFICADO / IMPLEMENTADO / PROBADO (sintético)** | falta ELF real |
+| TOC de MR7.DAT | **IDENTIFICADO / IMPLEMENTADO / PROBADO (sintético)** | falta ELF real |
 | RRLZ | **IMPLEMENTADO / PROBADO** | test sintético |
 | Shell nativo | **IMPLEMENTADO / COMPILADO / PROBADO** | D3D11, RTX 5070 |
 | Runtime ps3recomp | **COMPILADO** | 160/160, MinGW |
-| Lifter PPU sobre RM7 | **PENDIENTE** | bloqueado por cifrado |
-| Imports/HLE de RM7 | **PENDIENTE** | bloqueado |
-| SPU/SPURS de RM7 | **PENDIENTE** | bloqueado |
-| RSX de RM7 | **PENDIENTE** | bloqueado |
+| Lifter PPU sobre MR7 | **PENDIENTE** | bloqueado por cifrado |
+| Imports/HLE de MR7 | **PENDIENTE** | bloqueado |
+| SPU/SPURS de MR7 | **PENDIENTE** | bloqueado |
+| RSX de MR7 | **PENDIENTE** | bloqueado |
 | Física/IA | **PENDIENTE** | bloqueado |
 | Primera carrera | **PENDIENTE** | bloqueado |
 
@@ -595,13 +595,13 @@ obtenido de una copia legítima. Opciones:
 Colocar el archivo en:
 
 ```
-RM7-Native/game/EBOOT.ELF
+MR7-Native/game/EBOOT.ELF
 ```
 
 y ejecutar:
 
 ```powershell
-python tools\racermax_dat.py locate --elf game\EBOOT.ELF --dat "G:\PS3_GAME\USRDIR\RM7.DAT" --json game\toc.json
+python tools\maxracer_dat.py locate --elf game\EBOOT.ELF --dat "G:\PS3_GAME\USRDIR\MR7.DAT" --json game\toc.json
 ```
 
 Con eso se desbloquea la Fase 4.
@@ -628,7 +628,7 @@ Con eso se desbloquea la Fase 4.
 1. Usuario: aportar `EBOOT.ELF` descifrado.
 2. Ejecutar `ppu_loader.py`, `find_functions.py`, `prx_analyzer.py` y publicar
    el inventario de imports/funciones.
-3. Localizar la TOC real y extraer `RM7.DAT`; verificar coches/circuitos.
+3. Localizar la TOC real y extraer `MR7.DAT`; verificar coches/circuitos.
 4. Lift de un subconjunto y arranque hasta la primera llamada HLE.
 5. Corregir `cellPamf` 4.1 y añadir el demuxer PES de ATRAC3plus.
 6. Medir SPU: extraer imágenes y decidir SPURS vs raw.
@@ -653,7 +653,7 @@ EXIT=0
 
 ```
 PARAM.SFO: 10 entries
-  TITLE                = RACER MAX 7
+  TITLE                = MAX RACER 7
   TITLE_ID             = BCES00009
 EBOOT: G:\PS3_GAME\USRDIR\EBOOT.BIN (7.52 MiB)
   SELF v2, header type 1, key revision 0x0001
@@ -703,5 +703,5 @@ all format tests passed
 - Nenkai/RRUnpacker, MIT (formato `.DAT`, RRLZ).
 - vgmstream, `src/meta/nub.c` (formato nuSound2).
 - RPCS3, `cellPamf.h` / `cellPamf.cpp` (referencia de comportamiento PAMF).
-- Digital Foundry, “Racer Max 7: The 1080p Dream” (28/06/2009).
+- Digital Foundry, “Max Racer 7: The 1080p Dream” (28/06/2009).
 - Sony PS3 Cell/RSX documentation (pública).
