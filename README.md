@@ -1,79 +1,83 @@
-﻿<p align="center">
+<p align="center">
   <img src="assets/banner.webp" alt="Max Racer 7 - Native Port" width="100%">
 </p>
 
 # Max Racer 7
 
-Port nativo a PC (Windows) del juego de carreras de PS3 **Ridge Racer 7**,
-hecho por recompilación estática del ejecutable con un runtime C/C++ propio
-(basado en [ps3recomp](https://github.com/sp00nznet/ps3recomp)). No es un
-emulador: el código del juego se traduce a código nativo x86-64 y el render
-va por DirectX 12.
+🇬🇧 **English** · 🇪🇸 [Español](README.es.md)
 
-> **Versión v0.0.1 — fase temprana de desarrollo (alfa).**
-> Arranca, reproduce los vídeos y llega a menús y carreras, pero hay fallos
-> gráficos, de vídeo y de velocidad. Todavía no es jugable de principio a fin.
+A native PC (Windows) port of the PS3 racing game **Ridge Racer 7**, built by
+statically recompiling the game's executable on top of a custom C/C++ runtime
+(based on [ps3recomp](https://github.com/sp00nznet/ps3recomp)). It is not an
+emulator: the game code is translated to native x86-64 code and rendering goes
+through DirectX 12.
 
-## ❤️ Apoya el proyecto
+> **Version v0.0.1 — early development stage (alpha).**
+> It boots, plays the videos and reaches the menus and races, but there are
+> graphical, video and performance issues. It is not yet playable from start
+> to finish.
 
-Si quieres que el port siga avanzando con nuevas actualizaciones, puedes
-apoyarlo en Patreon:
+## ❤️ Support the project
+
+If you want the port to keep moving forward with new updates, you can support
+it on Patreon:
 
 **👉 [patreon.com/cw/ilesraider](https://www.patreon.com/cw/ilesraider/membership)**
 
-## Descarga
+## Download
 
-Descarga el zip de la última versión en
+Get the latest zip from
 [Releases](https://github.com/kensaiken/max-racer-7/releases).
 
-**El paquete no incluye el juego.** Necesitas tu propia copia original
-(disco europeo **BCES00009**).
+**The package does not include the game.** You need your own original copy
+(European disc **BCES00009**).
 
-## Instalación
+## Installation
 
-Guía completa: [INSTALACION.md](INSTALACION.md). Resumen:
+Full guide: [INSTALL.md](INSTALL.md). Quick version:
 
-1. Instala el [Visual C++ Redistributable x64](https://aka.ms/vs/17/release/vc_redist.x64.exe).
-2. Descomprime `MaxRacer7-v0.0.1.zip` en una carpeta.
-3. Copia el **EBOOT.elf descifrado** de tu disco a `game\EBOOT.elf`
-   (con RPCS3: *Utilities → Decrypt PS3 Binaries* sobre `PS3_GAME\USRDIR\EBOOT.BIN`).
-4. Ejecuta `Iniciar.bat` e indica tu ISO o la carpeta del disco:
-   `Iniciar.bat -Disco "D:\Juegos\RR7.iso"`
+1. Install the [Visual C++ Redistributable x64](https://aka.ms/vs/17/release/vc_redist.x64.exe).
+2. Extract `MaxRacer7-v0.0.1.zip` to a folder.
+3. Copy the **decrypted EBOOT.elf** from your disc to `game\EBOOT.elf`
+   (with RPCS3: *Utilities → Decrypt PS3 Binaries* on `PS3_GAME\USRDIR\EBOOT.BIN`).
+4. Run `Iniciar.bat` and point it at your ISO or disc folder:
+   `Iniciar.bat -Disco "D:\Games\RR7.iso"`
 
-## Estado (v0.0.1)
+## Status (v0.0.1)
 
-| Área | Estado |
+| Area | Status |
 |---|---|
-| Ejecución del código del juego (PPU + SPU) | OK |
-| Carga de datos y streaming desde el disco | OK |
-| Vídeos (MPEG-2 vía FFmpeg) | OK, con algún fallo ocasional |
-| Menús y HUD | OK |
-| Carreras en 3D | Funcionan, con fallos gráficos |
-| Velocidad | Baja: la carrera va a cámara lenta |
-| Nitro | Pantalla incorrecta al activarlo |
-| Audio | Parcial |
+| Game code execution (PPU + SPU) | OK |
+| Loading and streaming data from disc | OK |
+| Videos (MPEG-2 via FFmpeg) | OK, occasional glitches |
+| Menus and HUD | OK |
+| 3D races | Working, with graphical glitches |
+| Performance | Low: races run in slow motion |
+| Nitro | Wrong screen when activated |
+| Audio | Partial |
 
-## Requisitos
+## Requirements
 
-- Windows 10/11 64 bits
-- GPU con DirectX 12
-- Mando XInput recomendado (también funciona con teclado, ver `LEEME.txt`)
+- Windows 10/11 64-bit
+- DirectX 12 capable GPU
+- XInput controller recommended (keyboard works too, see [INSTALL.md](INSTALL.md#controls))
 
-## Reportar fallos
+## Reporting bugs
 
-Abre un [issue](https://github.com/kensaiken/max-racer-7/issues) con una
-descripción, tu GPU y el archivo `log_err.txt` que se crea junto al ejecutable.
+Open an [issue](https://github.com/kensaiken/max-racer-7/issues) with a
+description, your GPU and the `log_err.txt` file created next to the
+executable.
 
-## Documentos técnicos
+## Technical documents (Spanish)
 
-- `INFORME_FASE4A.md` — bitácora técnica completa.
-- `ESTADO.md` — estado y pendientes.
+- `INFORME_FASE4A.md` — full technical log.
+- `ESTADO.md` — status and to-do.
 - `INFORME_FASE1.md`, `PLAN_FASE2.md`, `FORMATOS.md`, `COMPILACION.md`, `DEPURACION.md`, `LEGAL.md`.
 
-## Aviso legal
+## Legal notice
 
-Proyecto no oficial, sin afiliación con Bandai Namco ni Sony. Ni el
-repositorio ni las descargas incluyen el EBOOT original, datos, texturas,
-música, vídeos, claves ni firmware: todo eso sale de la copia del propio
-usuario. "Ridge Racer" es marca de Bandai Namco; "PlayStation" es marca de
-Sony Interactive Entertainment. Más detalles en [LEGAL.md](LEGAL.md).
+Unofficial project, not affiliated with Bandai Namco or Sony. Neither this
+repository nor the downloads include the original EBOOT, game data, textures,
+music, videos, keys or firmware: all of that comes from the user's own copy.
+"Ridge Racer" is a trademark of Bandai Namco; "PlayStation" is a trademark of
+Sony Interactive Entertainment. More details in [LEGAL.md](LEGAL.md) (Spanish).

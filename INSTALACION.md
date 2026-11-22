@@ -1,5 +1,7 @@
 # Instalación de Max Racer 7 (v0.0.1)
 
+🇬🇧 [English](INSTALL.md) · 🇪🇸 **Español**
+
 > Versión alfa en fase temprana de desarrollo. Espera fallos.
 
 ## 1. Requisitos
