@@ -1,4 +1,4 @@
-# Instalación de Max Racer 7 (v0.0.1)
+# Instalación de Max Racer 7 (v0.0.2)
 
 🇬🇧 [English](INSTALL.md) · 🇪🇸 **Español**
 
@@ -13,7 +13,7 @@
 
 ## 2. Descargar
 
-1. Ve a [Releases](https://github.com/kensaiken/max-racer-7/releases) y baja `MaxRacer7-v0.0.1.zip`.
+1. Ve a [Releases](https://github.com/kensaiken/max-racer-7/releases) y baja `MaxRacer7-v0.0.2.zip`.
 2. Descomprímelo en una carpeta sin permisos especiales, por ejemplo `C:\Juegos\MaxRacer7`
    (evita `Archivos de programa`).
 
@@ -84,7 +84,7 @@ Mando XInput (Xbox) recomendado. Con teclado:
 | "No encuentro el disco del juego" | Indica la ISO o la carpeta con `-Disco`. |
 | Aviso de EBOOT.elf no coincide | Usa la versión europea BCES00009 y descífrala con RPCS3. |
 | Pantalla negra o cierre | Abre un [issue](https://github.com/kensaiken/max-racer-7/issues) con `log_err.txt`. |
-| Va a cámara lenta | Conocido en v0.0.1; se está trabajando en el rendimiento. |
+| Va a cámara lenta | Conocido en v0.0.2; se está trabajando en el rendimiento. |
 
 ## Apoya el proyecto
 
