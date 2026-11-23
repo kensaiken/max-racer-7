@@ -12,7 +12,7 @@ statically recompiling the game's executable on top of a custom C/C++ runtime
 emulator: the game code is translated to native x86-64 code and rendering goes
 through DirectX 12.
 
-> **Version v0.0.3 — early development stage (alpha).**
+> **Version v0.0.4 — early development stage (alpha).**
 > It boots, plays the videos and reaches the menus and races, but there are
 > graphical, video and performance issues. It is not yet playable from start
 > to finish.
@@ -37,13 +37,13 @@ Get the latest zip from
 Full guide: [INSTALL.md](INSTALL.md). Quick version:
 
 1. Install the [Visual C++ Redistributable x64](https://aka.ms/vs/17/release/vc_redist.x64.exe).
-2. Extract `MaxRacer7-v0.0.3.zip` to a folder.
+2. Extract `MaxRacer7-v0.0.4.zip` to a folder.
 3. Copy the **decrypted EBOOT.elf** from your disc to `game\EBOOT.elf`
    (with RPCS3: *Utilities → Decrypt PS3 Binaries* on `PS3_GAME\USRDIR\EBOOT.BIN`).
 4. Run `Iniciar.bat` and point it at your ISO or disc folder:
    `Iniciar.bat -Disco "D:\Games\RR7.iso"`
 
-## Status (v0.0.3)
+## Status (v0.0.4)
 
 | Area | Status |
 |---|---|
@@ -54,7 +54,7 @@ Full guide: [INSTALL.md](INSTALL.md). Quick version:
 | 3D races | Working, with graphical glitches |
 | Performance | ~60 fps in most of the race, ~46 in the heaviest stretches |
 | Nitro | Wrong screen when activated |
-| Audio | Partial |
+| Audio | OK |
 
 ## Requirements
 
