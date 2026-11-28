@@ -17,6 +17,20 @@ through DirectX 12.
 > graphical, video and performance issues. It is not yet playable from start
 > to finish.
 
+## What's new in v0.0.5
+
+- **Fixed:** vertical light bars and a flickering "ghost" image in some tracks
+  (Mist Falls, mostly in the tunnel), caused by the bloom effect.
+- **Fixed:** rivals changing colour up close or using the player's colour;
+  ARCADE mode paint is now correct.
+- **Fixed:** choppy, noisy race music.
+- **Fewer hangs** on the boot logo.
+- **Smoother** driving: vertex conversion now runs in the background.
+- **New:** F11 (or Alt+Enter) toggles fullscreen.
+
+Full changelog: [Releases](https://github.com/kensaiken/max-racer-7/releases)
+or `CAMBIOS.txt` inside the zip.
+
 ## ❤️ Support the project
 
 If you want the port to keep moving forward with new updates, you can support
@@ -53,8 +67,12 @@ Full guide: [INSTALL.md](INSTALL.md). Quick version:
 | Menus and HUD | OK |
 | 3D races | Working, with graphical glitches |
 | Performance | ~60 fps in most of the race, ~46 in the heaviest stretches |
-| Nitro | Wrong screen when activated |
-| Audio | OK |
+| Particle effects (smoke, sparks, nitro flames) | Not rendered yet |
+| Audio (music, effects, voices) | OK |
+| Fullscreen | F11 or Alt+Enter |
+| Boot | Rare hang on the logo (close and reopen) |
+
+To record with OBS, use **Window Capture**.
 
 ## Requirements
 

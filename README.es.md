@@ -16,6 +16,21 @@ va por DirectX 12.
 > Arranca, reproduce los vídeos y llega a menús y carreras, pero hay fallos
 > gráficos, de vídeo y de velocidad. Todavía no es jugable de principio a fin.
 
+## Novedades de la v0.0.5
+
+- **Arreglado:** barras de luz verticales y una imagen "fantasma" que
+  parpadeaba en algunos circuitos (Mist Falls, sobre todo en el túnel).
+  Venían del efecto de resplandor (bloom).
+- **Arreglado:** los rivales cambiaban de color al acercarse o salían con el
+  color del jugador; la pintura del modo ARCADE ya sale bien.
+- **Arreglado:** música de carrera con cortes y ruido.
+- **Menos cuelgues** en el logo del arranque.
+- **Más fluido** conduciendo: los vértices se preparan en segundo plano.
+- **Nuevo:** F11 (o Alt+Enter) alterna pantalla completa.
+
+Historial completo: [Releases](https://github.com/kensaiken/max-racer-7/releases)
+o `CAMBIOS.txt` dentro del zip.
+
 ## ❤️ Apoya el proyecto
 
 Si quieres que el port siga avanzando con nuevas actualizaciones, puedes
@@ -52,8 +67,12 @@ Guía completa: [INSTALACION.md](INSTALACION.md). Resumen:
 | Menús y HUD | OK |
 | Carreras en 3D | Funcionan, con fallos gráficos |
 | Velocidad | ~60 fps en casi toda la carrera, ~46 en los tramos más pesados |
-| Nitro | Pantalla incorrecta al activarlo |
-| Audio | OK |
+| Efectos de partículas (humo, chispas, llamas del nitro) | Aún no se dibujan |
+| Audio (música, efectos, voces) | OK |
+| Pantalla completa | F11 o Alt+Enter |
+| Arranque | Algún cuelgue raro en el logo (cierra y vuelve a abrir) |
+
+Para grabar con OBS usa **Captura de ventana**.
 
 ## Requisitos
 

@@ -76,6 +76,7 @@ XInput (Xbox) controller recommended. Keyboard:
 | 1 / 2 | L2 / R2 |
 | Enter | START |
 | Tab | SELECT |
+| F11 / Alt+Enter | Toggle fullscreen |
 
 ## 6. Troubleshooting
 
@@ -86,6 +87,8 @@ XInput (Xbox) controller recommended. Keyboard:
 | EBOOT.elf mismatch warning | Use the European version BCES00009 and decrypt it with RPCS3. |
 | Black screen or crash | Open an [issue](https://github.com/kensaiken/max-racer-7/issues) with `log_err.txt`. |
 | Slow motion | Known in v0.0.5; performance work is in progress. |
+| Hangs on the boot logo | Rare; close the game and open it again. |
+| Black window in OBS | Use **Window Capture** instead of Game Capture. |
 
 ## Support the project
 

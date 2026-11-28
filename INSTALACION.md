@@ -75,6 +75,7 @@ Mando XInput (Xbox) recomendado. Con teclado:
 | 1 / 2 | L2 / R2 |
 | Enter | START |
 | Tab | SELECT |
+| F11 / Alt+Enter | Pantalla completa |
 
 ## 6. Problemas frecuentes
 
@@ -85,6 +86,8 @@ Mando XInput (Xbox) recomendado. Con teclado:
 | Aviso de EBOOT.elf no coincide | Usa la versión europea BCES00009 y descífrala con RPCS3. |
 | Pantalla negra o cierre | Abre un [issue](https://github.com/kensaiken/max-racer-7/issues) con `log_err.txt`. |
 | Va a cámara lenta | Conocido en v0.0.5; se está trabajando en el rendimiento. |
+| Se queda colgado en el logo | Pasa rara vez; cierra el juego y vuelve a abrirlo. |
+| Ventana negra en OBS | Usa **Captura de ventana** en vez de Captura de juego. |
 
 ## Apoya el proyecto
 
